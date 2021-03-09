@@ -5,6 +5,7 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.DimensionType;
 import org.apache.logging.log4j.Logger;
+import scala.tools.cmd.Opt;
 import team.catgirl.collar.api.entities.Entity;
 import team.catgirl.collar.api.entities.EntityType;
 import team.catgirl.collar.api.location.Dimension;
@@ -24,6 +25,7 @@ import team.catgirl.collar.security.mojang.MinecraftSession;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -44,6 +46,10 @@ public class CollarService implements CollarListener {
         this.ticks = ticks;
         this.plugins = plugins;
         this.logger = logger;
+    }
+
+    public Optional<Collar> getCollar() {
+        return collar == null ? Optional.empty() : Optional.of(collar);
     }
 
     public void start() {

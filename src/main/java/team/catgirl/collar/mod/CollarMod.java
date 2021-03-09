@@ -1,5 +1,6 @@
 package team.catgirl.collar.mod;
 
+import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -13,13 +14,16 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientDisconnection
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.Logger;
+import team.catgirl.collar.client.Collar;
 import team.catgirl.collar.client.CollarListener;
 import team.catgirl.collar.client.minecraft.Ticks;
+import team.catgirl.collar.mod.commands.MessageCollarCommand;
 import team.catgirl.collar.mod.plugins.ForgePlugins;
 import team.catgirl.collar.mod.plugins.Plugins;
 import team.catgirl.collar.mod.service.CollarService;
 
 import java.io.IOException;
+import java.util.function.Supplier;
 
 @SideOnly(Side.CLIENT)
 @Mod(modid = CollarMod.MODID, name = CollarMod.NAME, version = CollarMod.VERSION)
@@ -42,6 +46,8 @@ public class CollarMod implements CollarListener
     {
         logger = event.getModLog();
         MinecraftForge.EVENT_BUS.register(this);
+        Supplier<Collar> collarSupplier = () -> collar.getCollar().orElse(null);
+        ClientCommandHandler.instance.registerCommand(new MessageCollarCommand(collarSupplier));
     }
 
     @EventHandler
