@@ -156,7 +156,7 @@ public class CollarService implements CollarListener {
 
     private Set<Entity> nearbyPlayerEntities() {
         return Minecraft.getMinecraft().world.playerEntities.stream()
-                .map(entityPlayer -> new Entity(entityPlayer.getUniqueID(), entityPlayer.getPersistentID(), EntityType.PLAYER))
+                .map(entityPlayer -> new Entity(entityPlayer.getEntityId(), entityPlayer.getPersistentID(), EntityType.PLAYER))
                 .collect(Collectors.toSet());
     }
 
