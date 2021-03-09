@@ -1,14 +1,14 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
+  "modid": "team.catgirl.collar.mod",
+  "name": "Collar",
+  "description": "Do you want to play a block game?",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "",
+  "url": "http://www.collarmc.com/",
   "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
+  "authorList": ["orsond","sakuya","HermeticLock"],
+  "credits": "Team Catgirl 2021",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []
