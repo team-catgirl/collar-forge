@@ -23,12 +23,16 @@
  */
 package team.catgirl.collar.mod.forge.commands;
 
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandExceptionType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import org.jetbrains.annotations.Contract;
@@ -38,7 +42,7 @@ import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public class PlayerArgumentType implements ArgumentType<EntityPlayerMP> {
+public class PlayerArgumentType implements ArgumentType<EntityPlayer> {
 	private PlayerArgumentType() {
 	}
 
@@ -59,24 +63,23 @@ public class PlayerArgumentType implements ArgumentType<EntityPlayerMP> {
 	 * @param name    Name of the argument.
 	 * @return The player specified by the argument name in the command context.
 	 */
-	public static EntityPlayerMP getPlayer(CommandContext<?> context, String name) {
+	public static EntityPlayer getPlayer(CommandContext<?> context, String name) {
 		return context.getArgument(name, EntityPlayerMP.class);
 	}
 
 	@Override
-	public EntityPlayerMP parse(StringReader reader) throws CommandSyntaxException {
-		EntityPlayerMP player = PlayerUtils.getPlayerList().getPlayerByUsername(reader.readUnquotedString());
-		if (player == null) {
-			throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("player not found.");
-		} else
-			return player;
+	public EntityPlayer parse(StringReader reader) throws CommandSyntaxException {
+		return Minecraft.getMinecraft().world.playerEntities.stream()
+				.filter(thePlayer -> thePlayer.getName().equals(reader.readUnquotedString()))
+				.findFirst().orElseThrow(() -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("player not found"));
 	}
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-		PlayerUtils.getPlayerList().getPlayers().forEach(player -> {
-			if (player.getName().toLowerCase().startsWith(builder.getRemaining().toLowerCase()))
+		Minecraft.getMinecraft().world.playerEntities.forEach(player -> {
+			if (player.getName().toLowerCase().startsWith(builder.getRemaining().toLowerCase())) {
 				builder.suggest(player.getName());
+			}
 		});
 		return builder.buildFuture();
 	}

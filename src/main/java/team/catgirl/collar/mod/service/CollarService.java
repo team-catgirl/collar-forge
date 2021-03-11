@@ -5,6 +5,7 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.DimensionType;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import scala.tools.cmd.Opt;
 import team.catgirl.collar.api.entities.Entity;
 import team.catgirl.collar.api.entities.EntityType;
@@ -28,10 +29,17 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class CollarService implements CollarListener {
 
+    private final ExecutorService executors;
     private Collar collar;
     private final Ticks ticks;
     private final Plugins plugins;
@@ -46,18 +54,45 @@ public class CollarService implements CollarListener {
         this.ticks = ticks;
         this.plugins = plugins;
         this.logger = logger;
+        this.executors = Executors.newFixedThreadPool(5, new ThreadFactory() {
+            @Override
+            public Thread newThread(@NotNull Runnable r) {
+                Thread thread = new Thread(r);
+                thread.setName("Collar Worker");
+                return thread;
+            }
+        });
     }
 
     public Optional<Collar> getCollar() {
         return collar == null ? Optional.empty() : Optional.of(collar);
     }
 
-    public void connect() {
-        try {
-            collar = createCollar();
-        } catch (CollarException|IOException e) {
-            logger.error(e.getMessage(), e);
+    public void with(Consumer<Collar> action, Runnable emptyAction) {
+        if (collar == null) {
+            emptyAction.run();
+        } else {
+            action.accept(collar);
         }
+    }
+
+    public void with(Consumer<Collar> action) {
+        with(action, () -> sendMessage("Collar not connected"));
+    }
+
+    public void connect() {
+        executors.submit(() -> {
+            try {
+                collar = createCollar();
+                collar.connect();
+            } catch (CollarException e) {
+                displayStatus(e.getMessage());
+                logger.error(e.getMessage(), e);
+            } catch (IOException e) {
+                displayStatus("Failed to connect to Collar");
+                logger.error(e.getMessage(), e);
+            }
+        });
     }
 
     public void disconnect() {
@@ -69,12 +104,16 @@ public class CollarService implements CollarListener {
     @Override
     public void onStateChanged(Collar collar, Collar.State state) {
         switch (state) {
+            case CONNECTING:
+                displayStatus("Collar connecting...");
             case CONNECTED:
+                displayStatus("Collar connected");
                 collar.location().subscribe(locations);
                 collar.friends().subscribe(friends);
                 collar.messaging().subscribe(messaging);
                 collar.textures().subscribe(textures);
             case DISCONNECTED:
+                displayStatus("Collar disconnected");
                 collar.location().unsubscribe(locations);
                 collar.friends().unsubscribe(friends);
                 collar.messaging().unsubscribe(messaging);
@@ -85,15 +124,12 @@ public class CollarService implements CollarListener {
             switch (state) {
                 case CONNECTING:
                     plugin.onConnecting(collar);
-                    displayStatus("Connecting to Collar...");
                     break;
                 case CONNECTED:
                     plugin.onConnected(collar);
-                    displayStatus("Connected to Collar");
                     break;
                 case DISCONNECTED:
                     plugin.onDisconnected(collar);
-                    displayStatus("Disconnected from Collar");
                     break;
             }
         });
@@ -116,12 +152,13 @@ public class CollarService implements CollarListener {
 
     @Override
     public void onMinecraftAccountVerificationFailed(Collar collar, MinecraftSession session) {
-        displayStatus("There was a problem with using Collar");
+        displayStatus("Please verify Collar");
         sendMessage("Collar failed to verify your Minecraft account");
     }
 
     @Override
     public void onPrivateIdentityMismatch(Collar collar, String url) {
+        displayStatus("Collar encountered a problem");
         sendMessage("Your private identity did not match. We cannot decrypt your private data. To resolve please visit " + url);
     }
 

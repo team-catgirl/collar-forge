@@ -115,7 +115,7 @@ public abstract class CollarCommandBase extends CommandBase {
 		return true;
 	}
 
-	protected LiteralArgumentBuilder<CollarService> literal(String connect) {
-		return LiteralArgumentBuilder.<CollarService>literal(connect);
+	protected LiteralArgumentBuilder<CollarService> literal(String name) {
+		return LiteralArgumentBuilder.literal(name);
 	}
 }
