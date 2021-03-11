@@ -52,7 +52,7 @@ public class CollarService implements CollarListener {
         return collar == null ? Optional.empty() : Optional.of(collar);
     }
 
-    public void start() {
+    public void connect() {
         try {
             collar = createCollar();
         } catch (CollarException|IOException e) {
@@ -60,7 +60,7 @@ public class CollarService implements CollarListener {
         }
     }
 
-    public void stop() {
+    public void disconnect() {
         if (collar != null) {
             collar.disconnect();
         }
@@ -125,11 +125,11 @@ public class CollarService implements CollarListener {
         sendMessage("Your private identity did not match. We cannot decrypt your private data. To resolve please visit " + url);
     }
 
-    private static void displayStatus(String message) {
+    public void displayStatus(String message) {
         Minecraft.getMinecraft().player.sendStatusMessage(new TextComponentString(message), true);
     }
 
-    private static void sendMessage(String message) {
+    public void sendMessage(String message) {
         Minecraft.getMinecraft().player.sendStatusMessage(new TextComponentString(message), false);
     }
 

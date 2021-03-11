@@ -14,16 +14,14 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientDisconnection
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.Logger;
-import team.catgirl.collar.client.Collar;
 import team.catgirl.collar.client.CollarListener;
 import team.catgirl.collar.client.minecraft.Ticks;
-import team.catgirl.collar.mod.commands.MessageCollarCommand;
+import team.catgirl.collar.mod.forge.commands.CollarCommand;
 import team.catgirl.collar.mod.plugins.ForgePlugins;
 import team.catgirl.collar.mod.plugins.Plugins;
 import team.catgirl.collar.mod.service.CollarService;
 
-import java.io.IOException;
-import java.util.function.Supplier;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 
 @SideOnly(Side.CLIENT)
 @Mod(modid = CollarMod.MODID, name = CollarMod.NAME, version = CollarMod.VERSION)
@@ -39,20 +37,19 @@ public class CollarMod implements CollarListener
     private static boolean isConnectedToServer = false;
     private static final Plugins PLUGINS = new ForgePlugins();
 
-    private CollarService collar;
+    private CollarService collarService;
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)
     {
         logger = event.getModLog();
         MinecraftForge.EVENT_BUS.register(this);
-        Supplier<Collar> collarSupplier = () -> collar.getCollar().orElse(null);
-        ClientCommandHandler.instance.registerCommand(new MessageCollarCommand(collarSupplier));
     }
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
-        collar = new CollarService(TICKS, PLUGINS, logger);
+        collarService = new CollarService(TICKS, PLUGINS, logger);
+        ClientCommandHandler.instance.registerCommand(new CollarCommand(collarService));
     }
 
     @SubscribeEvent
@@ -64,13 +61,13 @@ public class CollarMod implements CollarListener
     public void onWorldLoaded(WorldEvent.Load load) {
         // Only start collar when the world is loaded and the server is connected
         if (!isWorldLoaded && isConnectedToServer) {
-            collar.start();
+            collarService.connect();
         }
         isWorldLoaded = true;
     }
 
     @SubscribeEvent
-    public void connected(ClientConnectedToServerEvent connected) throws IOException {
+    public void connected(ClientConnectedToServerEvent connected) {
         isConnectedToServer = true;
     }
 
@@ -79,8 +76,8 @@ public class CollarMod implements CollarListener
         isConnectedToServer = false;
         isWorldLoaded = false;
         // Stop collar and reset state
-        if (collar != null) {
-            collar.stop();
+        if (collarService != null) {
+            collarService.disconnect();
         }
     }
 }
