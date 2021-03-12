@@ -1,12 +1,7 @@
 package team.catgirl.collar.mod.service;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.world.DimensionType;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import scala.tools.cmd.Opt;
 import team.catgirl.collar.api.entities.Entity;
 import team.catgirl.collar.api.entities.EntityType;
 import team.catgirl.collar.api.location.Dimension;
@@ -21,26 +16,27 @@ import team.catgirl.collar.mod.features.Friends;
 import team.catgirl.collar.mod.features.Locations;
 import team.catgirl.collar.mod.features.Messaging;
 import team.catgirl.collar.mod.features.Textures;
+import team.catgirl.collar.mod.plastic.Plastic;
+import team.catgirl.collar.mod.plastic.player.Player;
+import team.catgirl.collar.mod.plastic.world.Position;
 import team.catgirl.collar.mod.plugins.Plugins;
 import team.catgirl.collar.security.mojang.MinecraftSession;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class CollarService implements CollarListener {
 
     private final ExecutorService executors;
     private Collar collar;
+    private final Plastic plastic;
     private final Ticks ticks;
     private final Plugins plugins;
     private final Logger logger;
@@ -50,7 +46,8 @@ public class CollarService implements CollarListener {
     public final Messaging messaging = new Messaging();
     public final Textures textures = new Textures();
 
-    public CollarService(Ticks ticks, Plugins plugins, Logger logger) {
+    public CollarService(Plastic plastic, Ticks ticks, Plugins plugins, Logger logger) {
+        this.plastic = plastic;
         this.ticks = ticks;
         this.plugins = plugins;
         this.logger = logger;
@@ -77,7 +74,7 @@ public class CollarService implements CollarListener {
     }
 
     public void with(Consumer<Collar> action) {
-        with(action, () -> sendMessage("Collar not connected"));
+        with(action, () -> plastic.display.sendMessage("Collar not connected"));
     }
 
     public void connect() {
@@ -86,10 +83,10 @@ public class CollarService implements CollarListener {
                 collar = createCollar();
                 collar.connect();
             } catch (CollarException e) {
-                displayStatus(e.getMessage());
+                plastic.display.displayStatus(e.getMessage());
                 logger.error(e.getMessage(), e);
             } catch (IOException e) {
-                displayStatus("Failed to connect to Collar");
+                plastic.display.displayStatus("Failed to connect to Collar");
                 logger.error(e.getMessage(), e);
             }
         });
@@ -105,15 +102,15 @@ public class CollarService implements CollarListener {
     public void onStateChanged(Collar collar, Collar.State state) {
         switch (state) {
             case CONNECTING:
-                displayStatus("Collar connecting...");
+                plastic.display.displayStatus("Collar connecting...");
             case CONNECTED:
-                displayStatus("Collar connected");
+                plastic.display.displayStatus("Collar connected");
                 collar.location().subscribe(locations);
                 collar.friends().subscribe(friends);
                 collar.messaging().subscribe(messaging);
                 collar.textures().subscribe(textures);
             case DISCONNECTED:
-                displayStatus("Collar disconnected");
+                plastic.display.displayStatus("Collar disconnected");
                 collar.location().unsubscribe(locations);
                 collar.friends().unsubscribe(friends);
                 collar.messaging().unsubscribe(messaging);
@@ -137,8 +134,8 @@ public class CollarService implements CollarListener {
 
     @Override
     public void onConfirmDeviceRegistration(Collar collar, String token, String approvalUrl) {
-        displayStatus("Collar registration required");
-        sendMessage("New Collar installation detected. You can register this installation with your Collar account at " + approvalUrl);
+        plastic.display.displayStatus("Collar registration required");
+        plastic.display.sendMessage("New Collar installation detected. You can register this installation with your Collar account at " + approvalUrl);
     }
 
     @Override
@@ -152,22 +149,14 @@ public class CollarService implements CollarListener {
 
     @Override
     public void onMinecraftAccountVerificationFailed(Collar collar, MinecraftSession session) {
-        displayStatus("Please verify Collar");
-        sendMessage("Collar failed to verify your Minecraft account");
+        plastic.display.displayStatus("Please verify Collar");
+        plastic.display.sendMessage("Collar failed to verify your Minecraft account");
     }
 
     @Override
     public void onPrivateIdentityMismatch(Collar collar, String url) {
-        displayStatus("Collar encountered a problem");
-        sendMessage("Your private identity did not match. We cannot decrypt your private data. To resolve please visit " + url);
-    }
-
-    public void displayStatus(String message) {
-        Minecraft.getMinecraft().player.sendStatusMessage(new TextComponentString(message), true);
-    }
-
-    public void sendMessage(String message) {
-        Minecraft.getMinecraft().player.sendStatusMessage(new TextComponentString(message), false);
+        plastic.display.displayStatus("Collar encountered a problem");
+        plastic.display.sendMessage("Your private identity did not match. We cannot decrypt your private data. To resolve please visit " + url);
     }
 
     private Collar createCollar() throws IOException {
@@ -175,7 +164,7 @@ public class CollarService implements CollarListener {
                 .withCollarDevelopmentServer()
                 .withListener(this)
                 .withTicks(ticks)
-                .withHomeDirectory(Minecraft.getMinecraft().mcDataDir)
+                .withHomeDirectory(plastic.home())
                 .withPlayerLocation(this::currentLocation)
                 .withEntitiesSupplier(this::nearbyPlayerEntities)
                 .withSession(this::getMinecraftSession).build();
@@ -183,37 +172,36 @@ public class CollarService implements CollarListener {
     }
 
     private MinecraftSession getMinecraftSession() {
-        String serverIP = Objects.requireNonNull(Minecraft.getMinecraft().getCurrentServerData()).serverIP;
-        UUID playerId = Minecraft.getMinecraft().getSession().getProfile().getId();
-        String playerName = Minecraft.getMinecraft().getSession().getProfile().getName();
-        String token = Minecraft.getMinecraft().getSession().getToken();
-//        return MinecraftSession.mojang(playerId, playerName, serverIP, token);
+        String serverIP = plastic.serverIp();
+        UUID playerId = plastic.world.currentPlayer().id();
+        String playerName = plastic.world.currentPlayer().name();
         return MinecraftSession.noJang(playerId, playerName, serverIP);
     }
 
     private Set<Entity> nearbyPlayerEntities() {
-        return Minecraft.getMinecraft().world.playerEntities.stream()
-                .map(entityPlayer -> new Entity(entityPlayer.getEntityId(), entityPlayer.getPersistentID(), EntityType.PLAYER))
+        return plastic.world.allPlayers().stream()
+                .map(entityPlayer -> new Entity(entityPlayer.networkId(), entityPlayer.id(), EntityType.PLAYER))
                 .collect(Collectors.toSet());
     }
 
     private Location currentLocation() {
-        EntityPlayerSP player = Minecraft.getMinecraft().player;
+        Player player = plastic.world.currentPlayer();
         Dimension result;
-        switch (DimensionType.getById(player.dimension)) {
+        switch (player.dimension()) {
             case NETHER:
                 result = Dimension.NETHER;
                 break;
             case OVERWORLD:
                 result = Dimension.OVERWORLD;
                 break;
-            case THE_END:
+            case END:
                 result = Dimension.END;
                 break;
             default:
                 result = Dimension.UNKNOWN;
                 break;
         }
-        return new Location(player.posX, player.posY, player.posZ, result);
+        Position position = player.position();
+        return new Location(position.x, position.y, position.z, result);
     }
 }

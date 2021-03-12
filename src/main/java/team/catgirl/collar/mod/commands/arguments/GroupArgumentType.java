@@ -1,4 +1,4 @@
-package team.catgirl.collar.mod.forge.commands;
+package team.catgirl.collar.mod.commands.arguments;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;

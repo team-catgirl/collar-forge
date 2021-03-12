@@ -1,4 +1,4 @@
-/**
+/*
  * MIT License
  *
  * Copyright (c) 2020 Headpat Services
@@ -21,11 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package team.catgirl.collar.mod.forge.commands;
+package team.catgirl.collar.mod.plastic.forge;
 
-import com.google.common.collect.ObjectArrays;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -36,43 +34,37 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import org.jetbrains.annotations.Nullable;
 import services.headpat.forgeextensions.ColorCode;
-import team.catgirl.collar.client.Collar;
+import team.catgirl.collar.mod.commands.Commands;
+import team.catgirl.collar.mod.plastic.Plastic;
 import team.catgirl.collar.mod.service.CollarService;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("NullableProblems")
-public abstract class CollarCommandBase extends CommandBase {
+public final class PlasticCommand<T> extends CommandBase {
 	private final String name;
-	private final CollarService collarService;
+	private final T source;
 
-	protected final CommandDispatcher<CollarService> commandDispatcher;
+	protected final CommandDispatcher<T> commandDispatcher;
 
 	@Override
 	public String getName() {
 		return name;
 	}
 
-	/**
-	 * @param name               Name of command.
-	 */
-	public CollarCommandBase(String name, CollarService collarService) {
+	public PlasticCommand(String name, Plastic plastic, T source) {
 		this.name = name;
-		this.collarService = collarService;
+		this.source = source;
 		this.commandDispatcher = new CommandDispatcher<>();
-		registerAll(this.commandDispatcher);
 	}
-
-	protected abstract void registerAll(CommandDispatcher<CollarService> dispatcher);
 
 	@Override
 	public final String getUsage( ICommandSender sender) {
 		StringBuilder builder = new StringBuilder();
 		builder.append(ColorCode.RED).append("Usages:");
-		for (String s : commandDispatcher.getAllUsage(commandDispatcher.getRoot(), collarService, true)) {
+		for (String s : commandDispatcher.getAllUsage(commandDispatcher.getRoot(), source, true)) {
 			builder.append("\n").append(ColorCode.RED).append("/").append(getName()).append(" ").append(s);
 		}
 		return builder.toString();
@@ -81,7 +73,7 @@ public abstract class CollarCommandBase extends CommandBase {
 	@Override
 	public final void execute( MinecraftServer server, ICommandSender sender, String[] args) {
 		try {
-			int result = this.commandDispatcher.execute(getCommandString(args), collarService);
+			int result = this.commandDispatcher.execute(getCommandString(args), source);
 			if (result <= 0) {
 				sender.sendMessage(new TextComponentString(getUsage(sender)));
 			}
@@ -96,11 +88,10 @@ public abstract class CollarCommandBase extends CommandBase {
 	@Override
 	public final List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
 		String commandString = getCommandString(args);
-		Suggestions suggestions = this.commandDispatcher.getCompletionSuggestions(this.commandDispatcher.parse(commandString, collarService)).join();
+		Suggestions suggestions = this.commandDispatcher.getCompletionSuggestions(this.commandDispatcher.parse(commandString, source)).join();
 		return suggestions.getList().stream().map(Suggestion::getText).collect(Collectors.toList());
 	}
 
-	//The way they implement execute doesnt allow for BrigadierBase to work with aliases :(.
 	@Override
 	public final List<String> getAliases() {
 		return Collections.emptyList();
@@ -113,9 +104,5 @@ public abstract class CollarCommandBase extends CommandBase {
 	@Override
 	public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
 		return true;
-	}
-
-	protected LiteralArgumentBuilder<CollarService> literal(String name) {
-		return LiteralArgumentBuilder.literal(name);
 	}
 }
