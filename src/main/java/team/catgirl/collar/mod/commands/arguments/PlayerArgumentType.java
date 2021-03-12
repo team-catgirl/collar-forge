@@ -1,4 +1,4 @@
-/**
+/*
  * MIT License
  *
  * Copyright (c) 2020 Headpat Services
@@ -31,26 +31,19 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import org.jetbrains.annotations.Contract;
 import services.headpat.forgeextensions.utils.PlayerUtils;
+import team.catgirl.collar.mod.plastic.Plastic;
+import team.catgirl.collar.mod.plastic.player.Player;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public class PlayerArgumentType implements ArgumentType<EntityPlayer> {
-	private PlayerArgumentType() {
-	}
+public class PlayerArgumentType implements ArgumentType<Player> {
+	private final Plastic plastic;
 
-	/**
-	 * Shortcut to create a new {@link PlayerArgumentType} instance.
-	 *
-	 * @return {@link PlayerArgumentType} instance.
-	 */
-	@Contract(value = " -> new", pure = true)
-	public static PlayerArgumentType player() {
-		return new PlayerArgumentType();
+	public PlayerArgumentType(Plastic plastic) {
+		this.plastic = plastic;
 	}
 
 	/**
@@ -60,14 +53,14 @@ public class PlayerArgumentType implements ArgumentType<EntityPlayer> {
 	 * @param name    Name of the argument.
 	 * @return The player specified by the argument name in the command context.
 	 */
-	public static EntityPlayer getPlayer(CommandContext<?> context, String name) {
-		return context.getArgument(name, EntityPlayerMP.class);
+	public static Player getPlayer(CommandContext<?> context, String name) {
+		return context.getArgument(name, Player.class);
 	}
 
 	@Override
-	public EntityPlayer parse(StringReader reader) throws CommandSyntaxException {
-		return Minecraft.getMinecraft().world.playerEntities.stream()
-				.filter(thePlayer -> thePlayer.getName().equals(reader.readUnquotedString()))
+	public Player parse(StringReader reader) throws CommandSyntaxException {
+		return plastic.world.allPlayers().stream()
+				.filter(thePlayer -> thePlayer.name().equals(reader.readUnquotedString()))
 				.findFirst().orElseThrow(() -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("player not found"));
 	}
 
