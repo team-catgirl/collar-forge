@@ -9,7 +9,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import team.catgirl.collar.api.groups.Group;
 import team.catgirl.collar.api.groups.GroupType;
 import team.catgirl.collar.client.Collar;
-import team.catgirl.collar.mod.plastic.player.Player;
+import team.catgirl.collar.client.api.groups.GroupInvitation;
 import team.catgirl.collar.mod.service.CollarService;
 
 import java.util.Collection;
@@ -17,29 +17,29 @@ import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public class GroupArgumentType implements ArgumentType<Group> {
+public class InvitationArgumentType implements ArgumentType<GroupInvitation> {
 
     private final CollarService collarService;
     private final GroupType type;
 
-    public GroupArgumentType(CollarService collarService, GroupType type) {
+    public InvitationArgumentType(CollarService collarService, GroupType type) {
         this.collarService = collarService;
         this.type = type;
     }
 
-    public static Group getGroup(CommandContext<?> context, String name) {
-        return context.getArgument(name, Group.class);
+    public static GroupInvitation getInvitation(CommandContext<?> context, String name) {
+        return context.getArgument(name, GroupInvitation.class);
     }
 
     @Override
-    public Group parse(StringReader reader) throws CommandSyntaxException {
+    public GroupInvitation parse(StringReader reader) throws CommandSyntaxException {
         if (!collarService.getCollar().isPresent()) {
             throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("Collar not connected");
         }
-        return collarService.getCollar().get().groups().all().stream()
-                .filter(group -> type == null || group.type.equals(type))
-                .filter(group -> group.name.equals(reader.readUnquotedString()))
-                .findFirst().orElseThrow(() -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("group not found"));
+        return collarService.getCollar().get().groups().invitations().stream()
+                .filter(invitation -> invitation.type.equals(type))
+                .filter(invitation -> invitation.name.equals(reader.readUnquotedString()))
+                .findFirst().orElseThrow(() -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("invitation not found"));
     }
 
     @Override
@@ -47,9 +47,8 @@ public class GroupArgumentType implements ArgumentType<Group> {
         if (!collarService.getCollar().isPresent()) {
             return builder.buildFuture();
         }
-        collarService.getCollar().get().groups().all().stream()
-                .filter(group -> type == null || group.type.equals(type))
-                .filter(group -> group.name.toLowerCase().startsWith(builder.getRemaining().toLowerCase()))
+        collarService.getCollar().get().groups().invitations().stream().filter(invitation -> invitation.type.equals(type))
+                .filter(invitation -> invitation.name.toLowerCase().startsWith(builder.getRemaining().toLowerCase()))
                 .forEach(group -> builder.suggest(group.name));
         return builder.buildFuture();
     }
@@ -59,9 +58,10 @@ public class GroupArgumentType implements ArgumentType<Group> {
         if (!collarService.getCollar().isPresent()) {
             return Collections.emptyList();
         }
-        return collarService.getCollar().get().groups().all().stream()
-                .filter(group -> group.type.equals(type))
+        return collarService.getCollar().get().groups().invitations().stream()
+                .filter(invitation -> invitation.type.equals(type))
                 .limit(3)
-                .map(group -> group.name).collect(Collectors.toList());
+                .map(invitation -> invitation.name)
+                .collect(Collectors.toList());
     }
 }
