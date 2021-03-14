@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import team.catgirl.collar.api.groups.Member;
+import team.catgirl.collar.mod.commands.exceptions.CommandTargetNotFoundException;
 import team.catgirl.plastic.Plastic;
 import team.catgirl.collar.mod.service.CollarService;
 
@@ -28,9 +29,10 @@ public final class GroupMemberArgumentType implements ArgumentType<Member> {
 
     @Override
     public Member parse(StringReader reader) throws CommandSyntaxException {
+        String input = reader.readUnquotedString();
         return members().stream()
-                .filter(thePlayer -> thePlayer.profile.name.equals(reader.readUnquotedString()))
-                .findFirst().orElseThrow(() -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("player not found"));
+                .filter(thePlayer -> thePlayer.profile.name.equals(input))
+                .findFirst().orElseThrow(() -> new CommandTargetNotFoundException("group member '" + reader.readUnquotedString() +  "' not found"));
     }
 
     @Override

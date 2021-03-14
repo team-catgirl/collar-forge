@@ -29,6 +29,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import team.catgirl.collar.mod.commands.exceptions.CommandTargetNotFoundException;
 import team.catgirl.plastic.Plastic;
 import team.catgirl.plastic.player.Player;
 
@@ -56,9 +57,10 @@ public class PlayerArgumentType implements ArgumentType<Player> {
 
 	@Override
 	public Player parse(StringReader reader) throws CommandSyntaxException {
+		String input = reader.readUnquotedString();
 		return plastic.world.allPlayers().stream()
-				.filter(thePlayer -> thePlayer.name().equals(reader.readUnquotedString()))
-				.findFirst().orElseThrow(() -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("player not found"));
+				.filter(thePlayer -> thePlayer.name().equals(input))
+				.findFirst().orElseThrow(() -> new CommandTargetNotFoundException("player '" + input +  "' not found"));
 	}
 
 	@Override

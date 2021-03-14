@@ -33,6 +33,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import org.jetbrains.annotations.Nullable;
+import team.catgirl.collar.mod.commands.exceptions.CommandTargetNotFoundException;
 
 import java.util.Collections;
 import java.util.List;
@@ -73,6 +74,8 @@ public final class ForgeCommand<T> extends CommandBase {
 			if (result <= 0) {
 				sender.sendMessage(new TextComponentString(getUsage(sender)));
 			}
+		} catch (CommandTargetNotFoundException e) {
+			sender.sendMessage(new TextComponentString(e.getMessage()));
 		} catch (CommandSyntaxException e) {
 			if (e.getMessage() != null) {
 				sender.sendMessage(new TextComponentString(e.getMessage()));

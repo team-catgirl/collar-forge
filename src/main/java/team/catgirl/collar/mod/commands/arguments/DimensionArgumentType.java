@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import team.catgirl.collar.api.location.Dimension;
+import team.catgirl.collar.mod.commands.exceptions.CommandTargetNotFoundException;
 
 import java.util.Collection;
 import java.util.List;
@@ -23,9 +24,10 @@ public class DimensionArgumentType implements ArgumentType<Dimension> {
 
     @Override
     public Dimension parse(StringReader reader) throws CommandSyntaxException {
-        return dimensions().stream().filter(dimension -> reader.readUnquotedString().equals(dimension))
+        String input = reader.readUnquotedString();
+        return dimensions().stream().filter(dimension -> input.equals(dimension))
                 .findFirst().map(Dimension::valueOf)
-                .orElseThrow(() -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("dimension not found"));
+                .orElseThrow(() -> new CommandTargetNotFoundException("dimension '" + reader.readUnquotedString() +  "' not found"));
     }
 
     @Override

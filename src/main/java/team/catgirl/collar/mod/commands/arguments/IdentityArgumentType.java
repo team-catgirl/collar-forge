@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import team.catgirl.collar.api.profiles.PublicProfile;
+import team.catgirl.collar.mod.commands.exceptions.CommandTargetNotFoundException;
 import team.catgirl.plastic.Plastic;
 import team.catgirl.plastic.player.Player;
 import team.catgirl.collar.mod.service.CollarService;
@@ -29,9 +30,10 @@ public final class IdentityArgumentType implements ArgumentType<IdentityArgument
 
     @Override
     public IdentityArgument parse(StringReader reader) throws CommandSyntaxException {
+        String input = reader.readUnquotedString();
         return identities().stream()
-                .filter(identityArgument -> identityArgument.name.equals(reader.readUnquotedString()))
-                .findFirst().orElseThrow(() -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("player not found"));
+                .filter(identityArgument -> identityArgument.name.equals(input))
+                .findFirst().orElseThrow(() -> new CommandTargetNotFoundException("player '" + input +  "' not found"));
     }
 
     @Override

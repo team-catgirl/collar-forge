@@ -287,7 +287,7 @@ public class Commands {
 
         // collar location waypoint list
         dispatcher.register(literal("waypoint")
-                .then(literal("list"))
+                .then(literal("list")
                 .executes(context -> {
                     collarService.with(collar -> {
                         Set<Waypoint> waypoints = collar.location().privateWaypoints();
@@ -298,7 +298,7 @@ public class Commands {
                         }
                     });
                     return 1;
-                }));
+                })));
 
         // collar waypoint remove [name]
         dispatcher.register(literal("waypoint")

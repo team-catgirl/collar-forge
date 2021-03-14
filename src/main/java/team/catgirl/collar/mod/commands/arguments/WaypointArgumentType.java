@@ -10,6 +10,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import team.catgirl.collar.api.groups.Group;
 import team.catgirl.collar.api.waypoints.Waypoint;
 import team.catgirl.collar.client.Collar;
+import team.catgirl.collar.mod.commands.exceptions.CommandTargetNotFoundException;
 import team.catgirl.collar.mod.service.CollarService;
 
 import java.util.ArrayList;
@@ -30,9 +31,10 @@ public class WaypointArgumentType implements ArgumentType<WaypointArgumentType.W
 
     @Override
     public WaypointArgument parse(StringReader reader) throws CommandSyntaxException {
-        return waypoints().stream().filter(waypoint -> reader.readUnquotedString().equals(waypoint.waypoint.name))
+        String input = reader.readUnquotedString();
+        return waypoints().stream().filter(waypoint -> input.equals(waypoint.waypoint.name))
                 .findFirst()
-                .orElseThrow(() -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("waypoint not found"));
+                .orElseThrow(() -> new CommandTargetNotFoundException("waypoint '" + input +  "' not found"));
     }
 
     @Override

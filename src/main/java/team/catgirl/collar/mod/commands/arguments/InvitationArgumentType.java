@@ -6,10 +6,9 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import team.catgirl.collar.api.groups.Group;
 import team.catgirl.collar.api.groups.GroupType;
-import team.catgirl.collar.client.Collar;
 import team.catgirl.collar.client.api.groups.GroupInvitation;
+import team.catgirl.collar.mod.commands.exceptions.CommandTargetNotFoundException;
 import team.catgirl.collar.mod.service.CollarService;
 
 import java.util.Collection;
@@ -36,10 +35,11 @@ public class InvitationArgumentType implements ArgumentType<GroupInvitation> {
         if (!collarService.getCollar().isPresent()) {
             throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("Collar not connected");
         }
+        String input = reader.readUnquotedString();
         return collarService.getCollar().get().groups().invitations().stream()
                 .filter(invitation -> invitation.type.equals(type))
-                .filter(invitation -> invitation.name.equals(reader.readUnquotedString()))
-                .findFirst().orElseThrow(() -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("invitation not found"));
+                .filter(invitation -> invitation.name.equals(input))
+                .findFirst().orElseThrow(() -> new CommandTargetNotFoundException("invitation to group '" + input +  "' not found"));
     }
 
     @Override

@@ -8,6 +8,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import team.catgirl.collar.api.groups.Group;
 import team.catgirl.collar.api.groups.GroupType;
+import team.catgirl.collar.mod.commands.exceptions.CommandTargetNotFoundException;
 import team.catgirl.collar.mod.service.CollarService;
 
 import java.util.Collection;
@@ -35,9 +36,10 @@ public class GroupArgumentType implements ArgumentType<Group> {
         if (!collarService.getCollar().isPresent()) {
             throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("Collar not connected");
         }
+        String input = reader.readUnquotedString();
         return groupList().stream()
-                .filter(group -> group.name.equals(reader.readUnquotedString()))
-                .findFirst().orElseThrow(() -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("group not found"));
+                .filter(group -> group.name.equals(input))
+                .findFirst().orElseThrow(() -> new CommandTargetNotFoundException("group '" + input +  "' not found"));
     }
 
     @Override
