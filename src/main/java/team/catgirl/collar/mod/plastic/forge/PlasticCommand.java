@@ -33,10 +33,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import org.jetbrains.annotations.Nullable;
-import services.headpat.forgeextensions.ColorCode;
-import team.catgirl.collar.mod.commands.Commands;
 import team.catgirl.collar.mod.plastic.Plastic;
-import team.catgirl.collar.mod.service.CollarService;
 
 import java.util.Collections;
 import java.util.List;
@@ -63,9 +60,9 @@ public final class PlasticCommand<T> extends CommandBase {
 	@Override
 	public final String getUsage( ICommandSender sender) {
 		StringBuilder builder = new StringBuilder();
-		builder.append(ColorCode.RED).append("Usages:");
+		builder.append("Usages:");
 		for (String s : commandDispatcher.getAllUsage(commandDispatcher.getRoot(), source, true)) {
-			builder.append("\n").append(ColorCode.RED).append("/").append(getName()).append(" ").append(s);
+			builder.append("\n").append("/").append(getName()).append(" ").append(s);
 		}
 		return builder.toString();
 	}
@@ -79,7 +76,7 @@ public final class PlasticCommand<T> extends CommandBase {
 			}
 		} catch (CommandSyntaxException e) {
 			if (e.getMessage() != null)
-				sender.sendMessage(new TextComponentString(ColorCode.RED + e.getMessage()));
+				sender.sendMessage(new TextComponentString(e.getMessage()));
 
 			sender.sendMessage(new TextComponentString(getUsage(sender)));
 		}

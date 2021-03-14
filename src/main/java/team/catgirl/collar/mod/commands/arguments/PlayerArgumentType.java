@@ -29,9 +29,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import services.headpat.forgeextensions.utils.PlayerUtils;
 import team.catgirl.collar.mod.plastic.Plastic;
 import team.catgirl.collar.mod.plastic.player.Player;
 
@@ -66,9 +63,9 @@ public class PlayerArgumentType implements ArgumentType<Player> {
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-		Minecraft.getMinecraft().world.playerEntities.forEach(player -> {
-			if (player.getName().toLowerCase().startsWith(builder.getRemaining().toLowerCase())) {
-				builder.suggest(player.getName());
+		plastic.world.allPlayers().forEach(player -> {
+			if (player.name().toLowerCase().startsWith(builder.getRemaining().toLowerCase())) {
+				builder.suggest(player.name());
 			}
 		});
 		return builder.buildFuture();
@@ -76,6 +73,6 @@ public class PlayerArgumentType implements ArgumentType<Player> {
 
 	@Override
 	public Collection<String> getExamples() {
-		return PlayerUtils.getPlayerList().getPlayers().stream().map(EntityPlayer::getName).collect(Collectors.toList());
+		return plastic.world.allPlayers().stream().map(Player::name).collect(Collectors.toList());
 	}
 }
