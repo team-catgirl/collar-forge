@@ -12,4 +12,9 @@ public interface Display {
      * @param message to send
      */
     void sendMessage(String message);
+
+    /**
+     * @return new text builder
+     */
+    TextBuilder newTextBuilder();
 }

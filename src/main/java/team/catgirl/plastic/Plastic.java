@@ -58,7 +58,7 @@ public abstract class Plastic {
     /**
      * @param plastic instance to set globally
      */
-    public static void setPlastic(Plastic plastic) {
+    private static void setPlastic(Plastic plastic) {
         if (INSTANCE != null) {
             throw new IllegalStateException("plastic instance is already set");
         }

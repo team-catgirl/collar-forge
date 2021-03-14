@@ -15,6 +15,9 @@ import team.catgirl.collar.mod.features.*;
 import team.catgirl.event.EventBus;
 import team.catgirl.plastic.Plastic;
 import team.catgirl.plastic.player.Player;
+import team.catgirl.plastic.ui.TextAction;
+import team.catgirl.plastic.ui.TextBuilder;
+import team.catgirl.plastic.ui.TextFormatting;
 import team.catgirl.plastic.world.Position;
 import team.catgirl.collar.mod.plugins.Plugins;
 import team.catgirl.collar.security.mojang.MinecraftSession;
@@ -102,12 +105,15 @@ public class CollarService implements CollarListener {
     @Override
     public void onStateChanged(Collar collar, Collar.State state) {
         backgroundJobs.submit(() -> {
+            String formatted;
             switch (state) {
                 case CONNECTING:
-                    plastic.display.sendMessage("Collar connecting...");
+                    formatted = this.plastic.display.newTextBuilder().add("Collar connecting...", TextFormatting.GREEN).formatted();
+                    plastic.display.sendMessage(formatted);
                     break;
                 case CONNECTED:
-                    plastic.display.sendMessage("Collar connected");
+                    formatted = this.plastic.display.newTextBuilder().add("Collar connected", TextFormatting.GREEN).formatted();
+                    plastic.display.sendMessage(formatted);
                     collar.location().subscribe(locations);
                     collar.groups().subscribe(groups);
                     collar.friends().subscribe(friends);
@@ -115,7 +121,8 @@ public class CollarService implements CollarListener {
                     collar.textures().subscribe(textures);
                     break;
                 case DISCONNECTED:
-                    plastic.display.sendMessage("Collar disconnected");
+                    formatted = this.plastic.display.newTextBuilder().add("Collar disconnected", TextFormatting.GREEN).formatted();
+                    plastic.display.sendMessage(formatted);
                     break;
             }
             plugins.find().forEach(plugin -> {
@@ -137,7 +144,10 @@ public class CollarService implements CollarListener {
     @Override
     public void onConfirmDeviceRegistration(Collar collar, String token, String approvalUrl) {
         plastic.display.displayStatus("Collar registration required");
-        plastic.display.sendMessage("New Collar installation detected. You can register this installation with your Collar account at " + approvalUrl);
+        String formatted = plastic.display.newTextBuilder().add("New Collar installation detected. You can register this installation with your Collar account at ")
+                .add(approvalUrl, TextFormatting.GOLD, new TextAction.OpenLinkAction(approvalUrl))
+                .formatted();
+        plastic.display.sendMessage(formatted);
     }
 
     @Override
@@ -151,14 +161,18 @@ public class CollarService implements CollarListener {
 
     @Override
     public void onMinecraftAccountVerificationFailed(Collar collar, MinecraftSession session) {
-        plastic.display.displayStatus("Please verify Collar");
-        plastic.display.sendMessage("Collar failed to verify your Minecraft account");
+        plastic.display.displayStatus("Account verification failed");
+        String message = plastic.display.newTextBuilder().add("Collar failed to verify your Minecraft account", TextFormatting.RED).formatted();
+        plastic.display.sendMessage(message);
     }
 
     @Override
     public void onPrivateIdentityMismatch(Collar collar, String url) {
         plastic.display.displayStatus("Collar encountered a problem");
-        plastic.display.sendMessage("Your private identity did not match. We cannot decrypt your private data. To resolve please visit " + url);
+        String formatted = plastic.display.newTextBuilder().add("Your private identity did not match. We cannot decrypt your private data. To resolve please visit ")
+                .add(url, TextFormatting.RED, new TextAction.OpenLinkAction(url))
+                .formatted();
+        plastic.display.sendMessage(formatted + url);
     }
 
     private Collar createCollar() throws IOException {
