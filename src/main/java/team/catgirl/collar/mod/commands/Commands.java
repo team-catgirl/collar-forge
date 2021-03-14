@@ -47,6 +47,7 @@ public class Commands {
         registerServiceCommands(dispatcher);
         registerFriendCommands(dispatcher);
         registerLocationCommands(dispatcher);
+        registerWaypointCommands(dispatcher);
         registerGroupCommands(GroupType.PARTY, dispatcher);
         registerGroupCommands(GroupType.GROUP, dispatcher);
     }
