@@ -52,7 +52,7 @@ public class CollarService implements CollarListener {
         this.textures = new Textures(plastic);
         this.groups = new Groups(plastic);
         this.logger = logger;
-        this.backgroundJobs = Executors.newFixedThreadPool(5, r -> {
+        this.backgroundJobs = Executors.newCachedThreadPool(r -> {
             Thread thread = new Thread(r);
             thread.setName("Collar Worker");
             return thread;
