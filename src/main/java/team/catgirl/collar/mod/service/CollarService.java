@@ -1,7 +1,6 @@
 package team.catgirl.collar.mod.service;
 
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import team.catgirl.collar.api.entities.Entity;
 import team.catgirl.collar.api.entities.EntityType;
 import team.catgirl.collar.api.location.Dimension;
@@ -25,13 +24,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class CollarService implements CollarListener {
 
-    private final ExecutorService executors;
+    private final ExecutorService backgroundJobs;
     private Collar collar;
     private final Plastic plastic;
     private final Ticks ticks;
@@ -54,13 +52,10 @@ public class CollarService implements CollarListener {
         this.textures = new Textures(plastic);
         this.groups = new Groups(plastic);
         this.logger = logger;
-        this.executors = Executors.newFixedThreadPool(5, new ThreadFactory() {
-            @Override
-            public Thread newThread(@NotNull Runnable r) {
-                Thread thread = new Thread(r);
-                thread.setName("Collar Worker");
-                return thread;
-            }
+        this.backgroundJobs = Executors.newFixedThreadPool(5, r -> {
+            Thread thread = new Thread(r);
+            thread.setName("Collar Worker");
+            return thread;
         });
     }
 
@@ -69,7 +64,7 @@ public class CollarService implements CollarListener {
     }
 
     public void with(Consumer<Collar> action, Runnable emptyAction) {
-        if (collar == null) {
+        if (collar == null || !collar.getState().equals(Collar.State.CONNECTED)) {
             emptyAction.run();
         } else {
             action.accept(collar);
@@ -81,7 +76,7 @@ public class CollarService implements CollarListener {
     }
 
     public void connect() {
-        executors.submit(() -> {
+        backgroundJobs.submit(() -> {
             try {
                 collar = createCollar();
                 collar.connect();
@@ -96,39 +91,43 @@ public class CollarService implements CollarListener {
     }
 
     public void disconnect() {
-        if (collar != null) {
-            collar.disconnect();
-        }
+        backgroundJobs.submit(() -> {
+            if (collar != null) {
+                collar.disconnect();
+            }
+        });
     }
 
     @Override
     public void onStateChanged(Collar collar, Collar.State state) {
-        switch (state) {
-            case CONNECTING:
-                plastic.display.displayStatus("Collar connecting...");
-            case CONNECTED:
-                plastic.display.displayStatus("Collar connected");
-                collar.location().subscribe(locations);
-                collar.groups().subscribe(groups);
-                collar.friends().subscribe(friends);
-                collar.messaging().subscribe(messaging);
-                collar.textures().subscribe(textures);
-            case DISCONNECTED:
-                plastic.display.displayStatus("Collar disconnected");
-                break;
-        }
-        plugins.find().forEach(plugin -> {
+        backgroundJobs.submit(() -> {
             switch (state) {
                 case CONNECTING:
-                    plugin.onConnecting(collar);
-                    break;
+                    plastic.display.displayStatus("Collar connecting...");
                 case CONNECTED:
-                    plugin.onConnected(collar);
-                    break;
+                    plastic.display.displayStatus("Collar connected");
+                    collar.location().subscribe(locations);
+                    collar.groups().subscribe(groups);
+                    collar.friends().subscribe(friends);
+                    collar.messaging().subscribe(messaging);
+                    collar.textures().subscribe(textures);
                 case DISCONNECTED:
-                    plugin.onDisconnected(collar);
+                    plastic.display.displayStatus("Collar disconnected");
                     break;
             }
+            plugins.find().forEach(plugin -> {
+                switch (state) {
+                    case CONNECTING:
+                        plugin.onConnecting(collar);
+                        break;
+                    case CONNECTED:
+                        plugin.onConnected(collar);
+                        break;
+                    case DISCONNECTED:
+                        plugin.onDisconnected(collar);
+                        break;
+                }
+            });
         });
     }
 
