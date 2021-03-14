@@ -10,7 +10,7 @@ import team.catgirl.collar.api.session.Player;
 import team.catgirl.collar.client.Collar;
 import team.catgirl.collar.client.api.messaging.MessagingApi;
 import team.catgirl.collar.client.api.messaging.MessagingListener;
-import team.catgirl.collar.mod.plastic.Plastic;
+import team.catgirl.plastic.Plastic;
 import team.catgirl.collar.security.mojang.MinecraftPlayer;
 
 /**

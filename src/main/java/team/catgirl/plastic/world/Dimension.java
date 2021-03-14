@@ -1,4 +1,4 @@
-package team.catgirl.collar.mod.plastic.world;
+package team.catgirl.plastic.world;
 
 public enum Dimension {
     OVERWORLD,

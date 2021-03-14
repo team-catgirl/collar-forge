@@ -1,16 +1,14 @@
-package team.catgirl.collar.mod.plastic.forge;
+package team.catgirl.plastic.forge;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraftforge.client.ClientCommandHandler;
-import team.catgirl.collar.mod.plastic.Plastic;
-import team.catgirl.collar.mod.plastic.forge.ui.DisplayImpl;
-import team.catgirl.collar.mod.plastic.forge.world.WorldForge;
+import team.catgirl.plastic.Plastic;
+import team.catgirl.plastic.forge.ui.DisplayImpl;
+import team.catgirl.plastic.forge.world.WorldForge;
 
 import java.io.File;
-import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class PlasticForge extends Plastic {

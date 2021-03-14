@@ -7,7 +7,7 @@ import team.catgirl.collar.api.waypoints.Waypoint;
 import team.catgirl.collar.client.Collar;
 import team.catgirl.collar.client.api.location.LocationApi;
 import team.catgirl.collar.client.api.location.LocationListener;
-import team.catgirl.collar.mod.plastic.Plastic;
+import team.catgirl.plastic.Plastic;
 
 import java.util.Set;
 
@@ -48,4 +48,14 @@ public class Locations implements LocationListener {
 
     @Override
     public void onPrivateWaypointsReceived(Collar collar, LocationApi locationApi, Set<Waypoint> privateWaypoints) {}
+
+    @Override
+    public void onStartedSharingLocation(Collar collar, LocationApi locationApi, Group group) {
+        plastic.display.sendMessage(String.format("Started sharing location with %s", group.name));
+    }
+
+    @Override
+    public void onStoppedSharingLocation(Collar collar, LocationApi locationApi, Group group) {
+        plastic.display.sendMessage(String.format("Stopped sharing location with %s", group.name));
+    }
 }

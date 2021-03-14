@@ -12,9 +12,9 @@ import team.catgirl.collar.client.CollarListener;
 import team.catgirl.collar.client.minecraft.Ticks;
 import team.catgirl.collar.client.security.ClientIdentityStore;
 import team.catgirl.collar.mod.features.*;
-import team.catgirl.collar.mod.plastic.Plastic;
-import team.catgirl.collar.mod.plastic.player.Player;
-import team.catgirl.collar.mod.plastic.world.Position;
+import team.catgirl.plastic.Plastic;
+import team.catgirl.plastic.player.Player;
+import team.catgirl.plastic.world.Position;
 import team.catgirl.collar.mod.plugins.Plugins;
 import team.catgirl.collar.security.mojang.MinecraftSession;
 
@@ -103,16 +103,18 @@ public class CollarService implements CollarListener {
         backgroundJobs.submit(() -> {
             switch (state) {
                 case CONNECTING:
-                    plastic.display.displayStatus("Collar connecting...");
+                    plastic.display.sendMessage("Collar connecting...");
+                    break;
                 case CONNECTED:
-                    plastic.display.displayStatus("Collar connected");
+                    plastic.display.sendMessage("Collar connected");
                     collar.location().subscribe(locations);
                     collar.groups().subscribe(groups);
                     collar.friends().subscribe(friends);
                     collar.messaging().subscribe(messaging);
                     collar.textures().subscribe(textures);
+                    break;
                 case DISCONNECTED:
-                    plastic.display.displayStatus("Collar disconnected");
+                    plastic.display.sendMessage("Collar disconnected");
                     break;
             }
             plugins.find().forEach(plugin -> {

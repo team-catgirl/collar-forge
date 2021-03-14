@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package team.catgirl.collar.mod.plastic.forge;
+package team.catgirl.plastic.forge;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -33,7 +33,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import org.jetbrains.annotations.Nullable;
-import team.catgirl.collar.mod.plastic.Plastic;
 
 import java.util.Collections;
 import java.util.List;

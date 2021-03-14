@@ -14,9 +14,9 @@ import team.catgirl.collar.api.waypoints.Waypoint;
 import team.catgirl.collar.mod.commands.arguments.*;
 import team.catgirl.collar.mod.commands.arguments.IdentityArgumentType.IdentityArgument;
 import team.catgirl.collar.mod.commands.arguments.WaypointArgumentType.WaypointArgument;
-import team.catgirl.collar.mod.plastic.Plastic;
-import team.catgirl.collar.mod.plastic.player.Player;
-import team.catgirl.collar.mod.plastic.world.Position;
+import team.catgirl.plastic.Plastic;
+import team.catgirl.plastic.player.Player;
+import team.catgirl.plastic.world.Position;
 import team.catgirl.collar.mod.service.CollarService;
 import team.catgirl.collar.security.mojang.MinecraftPlayer;
 
@@ -76,8 +76,8 @@ public class Commands {
     private void registerFriendCommands(CommandDispatcher<CollarService> dispatcher) {
         // collar friend add [user]
         dispatcher.register(literal("friend")
-            .then(literal("add"))
-                .then(argument("name", identity()))
+            .then(literal("add")
+                .then(argument("name", identity())
                     .executes(context -> {
                         collarService.with(collar -> {
                             IdentityArgument player = context.getArgument("name", IdentityArgument.class);
@@ -88,13 +88,12 @@ public class Commands {
                             }
                         });
                         return 1;
-                    })
-        );
+                    }))));
 
         // collar friend remove [user]
         dispatcher.register(literal("friend")
-                .then(literal("remove"))
-                .then(argument("name", identity()))
+                .then(literal("remove")
+                .then(argument("name", identity())
                 .executes(context -> {
                     collarService.with(collar -> {
                         IdentityArgument player = context.getArgument("name", IdentityArgument.class);
@@ -105,12 +104,11 @@ public class Commands {
                         }
                     });
                     return 1;
-                })
-        );
+                }))));
 
         // collar friend list
         dispatcher.register(literal("friend")
-                .then(literal("list"))
+                .then(literal("list")
                 .executes(context -> {
                     collarService.with(collar -> {
                         Set<Friend> friends = collar.friends().list();
@@ -121,8 +119,7 @@ public class Commands {
                         }
                     });
                     return 1;
-                })
-        );
+                })));
     }
 
     private void registerGroupCommands(GroupType type, CommandDispatcher<CollarService> dispatcher) {
@@ -157,36 +154,34 @@ public class Commands {
         // collar party leave [name]
         dispatcher.register(literal(type.name)
                 .then(literal("leave")
-                        .then(argument("name", groups())
-                                .executes(context -> {
-                                    collarService.with(collar -> {
-                                        collar.groups().leave(getGroup(context, "name"));
-                                    });
-                                    return 1;
-                                })
-                        )
+                .then(argument("name", group(type))
+                        .executes(context -> {
+                            collarService.with(collar -> {
+                                collar.groups().leave(getGroup(context, "name"));
+                            });
+                            return 1;
+                        })
                 )
-        );
+                ));
 
         // collar party accept [name]
         dispatcher.register(literal(type.name)
-                .then(literal("accept"))
-                .then(argument("groupName", invitation(type)))
+                .then(literal("accept")
+                .then(argument("groupName", invitation(type))
                 .executes(context -> {
                     collarService.with(collar -> {
                         collar.groups().accept(getInvitation(context, "groupName"));
                     });
                     return 1;
-                })
-        );
+                }))));
 
         // collar party list
         dispatcher.register(literal(type.name)
                 .then(literal("list")
                         .executes(context -> {
                             collarService.with(collar -> {
-                                List<Group> parties = collar.groups().matching(GroupType.GROUP, GroupType.PARTY).stream()
-                                        .filter(group -> group.type.equals(GroupType.PARTY))
+                                List<Group> parties = collar.groups().all().stream()
+                                        .filter(group -> group.type.equals(type))
                                         .collect(Collectors.toList());
                                 if (parties.isEmpty()) {
                                     plastic.display.sendMessage("You are not a member of any " + type.plural);
@@ -202,24 +197,23 @@ public class Commands {
 
         // collar party [name] add [player]
         dispatcher.register(literal(type.name)
-                .then(argument("groupName", group(type)))
-                        .then(literal("add"))
-                        .then(argument("playerName", player()))
-                        .executes(context -> {
-                            collarService.with(collar -> {
-                                Group group = getGroup(context, "groupName");
-                                Player player = getPlayer(context, "playerName");
-                                collar.groups().invite(group, ImmutableList.of(player.id()));
-                            });
-                            return 1;
-                        })
-        );
+                .then(argument("groupName", group(type))
+                .then(literal("add")
+                .then(argument("playerName", player())
+                .executes(context -> {
+                    collarService.with(collar -> {
+                        Group group = getGroup(context, "groupName");
+                        Player player = getPlayer(context, "playerName");
+                        collar.groups().invite(group, ImmutableList.of(player.id()));
+                    });
+                    return 1;
+                })))));
 
         // collar party [name] remove [player]
         dispatcher.register(literal(type.name)
-                .then(argument("groupName", group(type)))
-                .then(literal("remove"))
-                .then(argument("playerName", identity()))
+                .then(argument("groupName", group(type))
+                .then(literal("remove")
+                .then(argument("playerName", identity())
                 .executes(context -> {
                     collarService.with(collar -> {
                         Group group = getGroup(context, "groupName");
@@ -229,42 +223,75 @@ public class Commands {
                         });
                     });
                     return 1;
-                })
-        );
+                })))));
     }
 
     private void registerLocationCommands(CommandDispatcher<CollarService> dispatcher) {
         // collar location share start [any group name]
         dispatcher.register(literal("location")
-                .then(literal("share"))
-                .then(literal("start"))
-                .then(argument("groupName", groups()))
+                .then(literal("share")
+                .then(literal("start")
+                .then(argument("groupName", groups())
                 .executes(context -> {
                     collarService.with(collar -> {
                         Group group = getGroup(context, "groupName");
                         collar.location().startSharingWith(group);
                     });
                     return 1;
-                })
-        );
+                })))));
 
         // collar location share stop [any group name]
         dispatcher.register(literal("location")
-                .then(literal("share"))
-                .then(literal("stop"))
-                .then(argument("groupName", groups()))
+                .then(literal("share")
+                .then(literal("stop")
+                .then(argument("groupName", groups())
                 .executes(context -> {
                     collarService.with(collar -> {
                         Group group = getGroup(context, "groupName");
                         collar.location().stopSharingWith(group);
                     });
                     return 1;
-                })
-        );
+                })))));
 
-        // collar location waypoint list [any group name]
+        // collar location share stop [any group name]
         dispatcher.register(literal("location")
-                .then(literal("waypoint"))
+                .then(literal("share")
+                .then(literal("list")
+                .executes(context -> {
+                        collarService.with(collar -> {
+                            List<Group> active = collar.groups().all().stream()
+                                    .filter(group -> collar.location().isSharingWith(group))
+                                    .collect(Collectors.toList());
+                            if (active.isEmpty()) {
+                                plastic.display.sendMessage("You are not sharing your location with any groups");
+                            } else {
+                                plastic.display.sendMessage("You are sharing your location with groups:");
+                                active.forEach(group -> plastic.display.sendMessage(group.name + " (" + group.type.name + ")"));
+                            }
+                        });
+                    return 1;
+                }))));
+    }
+
+    private void registerWaypointCommands(CommandDispatcher<CollarService> dispatcher) {
+
+        // collar location waypoint add [name]
+        dispatcher.register(literal("waypoint")
+                .then(literal("add")
+                .then(argument("name", string())
+                .executes(context -> {
+                    collarService.with(collar -> {
+                        Position pos = plastic.world.currentPlayer().position();
+                        Dimension dimension = mapDimension();
+                        Location location = new Location(pos.x, pos.y, pos.z, dimension);
+                        collar.location().addWaypoint(getString(context, "name"), location);
+                    });
+                    return 1;
+                }))));
+
+
+        // collar location waypoint list
+        dispatcher.register(literal("waypoint")
                 .then(literal("list"))
                 .executes(context -> {
                     collarService.with(collar -> {
@@ -276,33 +303,47 @@ public class Commands {
                         }
                     });
                     return 1;
-                })
-        );
-
-        // collar location waypoint add [name]
-        dispatcher.register(literal("location")
-                .then(literal("waypoint"))
-                .then(literal("add"))
-                .then(argument("name", string()))
-                .executes(context -> {
-                    collarService.with(collar -> {
-                        Position pos = plastic.world.currentPlayer().position();
-                        Dimension dimension = mapDimension();
-                        Location location = new Location(pos.x, pos.y, pos.z, dimension);
-                        collar.location().addWaypoint(getString(context, "name"), location);
-                    });
-                    return 1;
                 }));
 
+        // collar waypoint remove [name]
+        dispatcher.register(literal("waypoint")
+                .then(literal("remove")
+                .then(argument("name", privateWaypoint())
+                .executes(context -> {
+                    collarService.with(collar -> {
+                        WaypointArgument argument = context.getArgument("name", WaypointArgument.class);
+                        collar.location().removeWaypoint(argument.waypoint);
+                    });
+                    return 1;
+                }))));
+
+
+
+        // collar location waypoint list [any group name]
+        dispatcher.register(literal("waypoint")
+                .then(literal("list")
+                .then(argument("group", groups())
+                .executes(context -> {
+                    collarService.with(collar -> {
+                        Group group = getGroup(context, "group");
+                        Set<Waypoint> waypoints = collar.location().groupWaypoints(group);
+                        if (waypoints.isEmpty()) {
+                            plastic.display.sendMessage("You have no private waypoints");
+                        } else {
+                            waypoints.forEach(waypoint -> plastic.display.sendMessage(waypoint.displayName()));
+                        }
+                    });
+                    return 1;
+                }))));
+
         // collar location waypoint add [name] [x] [y] [z] with [group]
-        dispatcher.register(literal("location")
-                .then(literal("waypoint"))
-                .then(literal("add"))
-                .then(argument("name", string()))
-                .then(argument("x", doubleArg()))
-                .then(argument("y", doubleArg()))
-                .then(argument("z", doubleArg()))
-                .then(argument("dimension", dimension()))
+        dispatcher.register(literal("waypoint")
+                .then(literal("add")
+                .then(argument("name", string())
+                .then(argument("x", doubleArg())
+                .then(argument("y", doubleArg())
+                .then(argument("z", doubleArg())
+                .then(argument("dimension", dimension())
                 .executes(context -> {
                     collarService.with(collar -> {
                         Dimension dimension = context.getArgument("dimension", Dimension.class);
@@ -315,16 +356,14 @@ public class Commands {
                         collar.location().addWaypoint(getString(context, "name"), location);
                     });
                     return 1;
-                })
-        );
+                }))))))));
 
         // collar location waypoint remove [name] from [group]
-        dispatcher.register(literal("location")
-                .then(literal("waypoint"))
-                .then(literal("remove"))
-                .then(argument("name", groupWaypoint()))
-                .then(literal("from"))
-                .then(argument("group", groups()))
+        dispatcher.register(literal("waypoint")
+                .then(literal("remove")
+                .then(argument("name", groupWaypoint())
+                .then(literal("from")
+                .then(argument("group", groups())
                 .executes(context -> {
                     collarService.with(collar -> {
                         Group group = getGroup(context, "group");
@@ -336,35 +375,16 @@ public class Commands {
                         }
                     });
                     return 1;
-                })
-        );
-
-        // collar location waypoint list
-        dispatcher.register(literal("location")
-                .then(literal("waypoint"))
-                .then(literal("list"))
-                .executes(context -> {
-                    collarService.with(collar -> {
-                        Set<Waypoint> waypoints = collar.location().privateWaypoints();
-                        if (waypoints.isEmpty()) {
-                            plastic.display.sendMessage("You have no private waypoints");
-                        } else {
-                            waypoints.forEach(waypoint -> plastic.display.sendMessage(waypoint.displayName()));
-                        }
-                    });
-                    return 1;
-                })
-        );
+                }))))));
 
         // collar waypoint add [name] [x] [y] [z]
-        dispatcher.register(literal("location")
-                .then(literal("waypoint"))
-                .then(literal("add"))
-                .then(argument("name", string()))
-                .then(argument("x", doubleArg()))
-                .then(argument("y", doubleArg()))
-                .then(argument("z", doubleArg()))
-                .then(argument("dimension", dimension()))
+        dispatcher.register(literal("waypoint")
+                .then(literal("add")
+                .then(argument("name", string())
+                .then(argument("x", doubleArg())
+                .then(argument("y", doubleArg())
+                .then(argument("z", doubleArg())
+                .then(argument("dimension", dimension())
                 .executes(context -> {
                     collarService.with(collar -> {
                         Dimension dimension = context.getArgument("dimension", Dimension.class);
@@ -377,22 +397,7 @@ public class Commands {
                         collar.location().addWaypoint(getString(context, "name"), location);
                     });
                     return 1;
-                })
-        );
-
-        // collar waypoint remove [name]
-        dispatcher.register(literal("location")
-                .then(literal("waypoint"))
-                .then(literal("remove"))
-                .then(argument("name", privateWaypoint()))
-                .executes(context -> {
-                    collarService.with(collar -> {
-                        WaypointArgument argument = context.getArgument("name", WaypointArgument.class);
-                        collar.location().removeWaypoint(argument.waypoint);
-                    });
-                    return 1;
-                })
-        );
+                }))))))));
     }
 
     private Dimension mapDimension() {

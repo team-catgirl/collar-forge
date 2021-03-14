@@ -4,7 +4,7 @@ import team.catgirl.collar.api.friends.Friend;
 import team.catgirl.collar.client.Collar;
 import team.catgirl.collar.client.api.friends.FriendsApi;
 import team.catgirl.collar.client.api.friends.FriendsListener;
-import team.catgirl.collar.mod.plastic.Plastic;
+import team.catgirl.plastic.Plastic;
 
 public class Friends implements FriendsListener {
 

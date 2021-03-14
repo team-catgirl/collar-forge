@@ -1,4 +1,4 @@
-package team.catgirl.collar.mod.plastic.world;
+package team.catgirl.plastic.world;
 
 public final class Position {
     public final double x;

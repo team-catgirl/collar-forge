@@ -8,12 +8,11 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import team.catgirl.collar.api.groups.Group;
 import team.catgirl.collar.api.groups.GroupType;
-import team.catgirl.collar.client.Collar;
-import team.catgirl.collar.mod.plastic.player.Player;
 import team.catgirl.collar.mod.service.CollarService;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -36,18 +35,14 @@ public class GroupArgumentType implements ArgumentType<Group> {
         if (!collarService.getCollar().isPresent()) {
             throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("Collar not connected");
         }
-        return collarService.getCollar().get().groups().all().stream()
-                .filter(group -> type == null || group.type.equals(type))
+        return groupList().stream()
                 .filter(group -> group.name.equals(reader.readUnquotedString()))
                 .findFirst().orElseThrow(() -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("group not found"));
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        if (!collarService.getCollar().isPresent()) {
-            return builder.buildFuture();
-        }
-        collarService.getCollar().get().groups().all().stream()
+        groupList().stream()
                 .filter(group -> type == null || group.type.equals(type))
                 .filter(group -> group.name.toLowerCase().startsWith(builder.getRemaining().toLowerCase()))
                 .forEach(group -> builder.suggest(group.name));
@@ -56,12 +51,18 @@ public class GroupArgumentType implements ArgumentType<Group> {
 
     @Override
     public Collection<String> getExamples() {
+        return groupList().stream()
+                .limit(3).map(group -> group.name).collect(Collectors.toList());
+    }
+
+    List<Group> groupList() {
         if (!collarService.getCollar().isPresent()) {
             return Collections.emptyList();
         }
-        return collarService.getCollar().get().groups().all().stream()
-                .filter(group -> group.type.equals(type))
-                .limit(3)
-                .map(group -> group.name).collect(Collectors.toList());
+        if (type == null) {
+            return collarService.getCollar().get().groups().matching(GroupType.GROUP, GroupType.PARTY);
+        } else {
+            return collarService.getCollar().get().groups().matching(type);
+        }
     }
 }

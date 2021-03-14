@@ -8,8 +8,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import team.catgirl.collar.api.profiles.PublicProfile;
-import team.catgirl.collar.mod.plastic.Plastic;
-import team.catgirl.collar.mod.plastic.player.Player;
+import team.catgirl.plastic.Plastic;
+import team.catgirl.plastic.player.Player;
 import team.catgirl.collar.mod.service.CollarService;
 
 import java.util.Collection;

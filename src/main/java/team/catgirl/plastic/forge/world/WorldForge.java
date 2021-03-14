@@ -1,10 +1,10 @@
-package team.catgirl.collar.mod.plastic.forge.world;
+package team.catgirl.plastic.forge.world;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import team.catgirl.collar.mod.plastic.player.Player;
-import team.catgirl.collar.mod.plastic.world.World;
-import team.catgirl.collar.mod.plastic.forge.player.PlayerForge;
+import team.catgirl.plastic.player.Player;
+import team.catgirl.plastic.world.World;
+import team.catgirl.plastic.forge.player.PlayerForge;
 
 import java.util.List;
 import java.util.stream.Collectors;

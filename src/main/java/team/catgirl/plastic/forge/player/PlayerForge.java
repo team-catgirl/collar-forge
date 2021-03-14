@@ -1,11 +1,11 @@
-package team.catgirl.collar.mod.plastic.forge.player;
+package team.catgirl.plastic.forge.player;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
-import team.catgirl.collar.mod.plastic.world.Dimension;
-import team.catgirl.collar.mod.plastic.player.Player;
-import team.catgirl.collar.mod.plastic.world.Position;
+import team.catgirl.plastic.world.Dimension;
+import team.catgirl.plastic.player.Player;
+import team.catgirl.plastic.world.Position;
 
 import java.util.UUID;
 

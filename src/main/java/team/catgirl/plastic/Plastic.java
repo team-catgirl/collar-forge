@@ -1,11 +1,10 @@
-package team.catgirl.collar.mod.plastic;
+package team.catgirl.plastic;
 
 import com.mojang.brigadier.CommandDispatcher;
-import team.catgirl.collar.mod.plastic.ui.Display;
-import team.catgirl.collar.mod.plastic.world.World;
+import team.catgirl.plastic.ui.Display;
+import team.catgirl.plastic.world.World;
 
 import java.io.File;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**

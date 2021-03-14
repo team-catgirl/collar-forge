@@ -1,6 +1,6 @@
-package team.catgirl.collar.mod.plastic.world;
+package team.catgirl.plastic.world;
 
-import team.catgirl.collar.mod.plastic.player.Player;
+import team.catgirl.plastic.player.Player;
 
 import java.util.List;
 
