@@ -51,10 +51,10 @@ public final class PlasticCommand<T> extends CommandBase {
 		return name;
 	}
 
-	public PlasticCommand(String name, Plastic plastic, T source) {
+	public PlasticCommand(String name, T source, CommandDispatcher<T> dispatcher) {
 		this.name = name;
 		this.source = source;
-		this.commandDispatcher = new CommandDispatcher<>();
+		this.commandDispatcher = dispatcher;
 	}
 
 	@Override
@@ -75,9 +75,9 @@ public final class PlasticCommand<T> extends CommandBase {
 				sender.sendMessage(new TextComponentString(getUsage(sender)));
 			}
 		} catch (CommandSyntaxException e) {
-			if (e.getMessage() != null)
+			if (e.getMessage() != null) {
 				sender.sendMessage(new TextComponentString(e.getMessage()));
-
+			}
 			sender.sendMessage(new TextComponentString(getUsage(sender)));
 		}
 	}

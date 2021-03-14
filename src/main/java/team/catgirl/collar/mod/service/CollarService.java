@@ -12,10 +12,7 @@ import team.catgirl.collar.client.CollarException;
 import team.catgirl.collar.client.CollarListener;
 import team.catgirl.collar.client.minecraft.Ticks;
 import team.catgirl.collar.client.security.ClientIdentityStore;
-import team.catgirl.collar.mod.features.Friends;
-import team.catgirl.collar.mod.features.Locations;
-import team.catgirl.collar.mod.features.Messaging;
-import team.catgirl.collar.mod.features.Textures;
+import team.catgirl.collar.mod.features.*;
 import team.catgirl.collar.mod.plastic.Plastic;
 import team.catgirl.collar.mod.plastic.player.Player;
 import team.catgirl.collar.mod.plastic.world.Position;
@@ -41,15 +38,21 @@ public class CollarService implements CollarListener {
     private final Plugins plugins;
     private final Logger logger;
 
-    public final Locations locations = new Locations();
-    public final Friends friends = new Friends();
-    public final Messaging messaging = new Messaging();
-    public final Textures textures = new Textures();
+    public final Locations locations;
+    public final Friends friends;
+    public final Messaging messaging;
+    public final Textures textures;
+    public final Groups groups;
 
     public CollarService(Plastic plastic, Ticks ticks, Plugins plugins, Logger logger) {
         this.plastic = plastic;
         this.ticks = ticks;
         this.plugins = plugins;
+        this.locations = new Locations(plastic);
+        this.friends = new Friends(plastic);
+        this.messaging = new Messaging(plastic);
+        this.textures = new Textures(plastic);
+        this.groups = new Groups(plastic);
         this.logger = logger;
         this.executors = Executors.newFixedThreadPool(5, new ThreadFactory() {
             @Override
@@ -106,15 +109,12 @@ public class CollarService implements CollarListener {
             case CONNECTED:
                 plastic.display.displayStatus("Collar connected");
                 collar.location().subscribe(locations);
+                collar.groups().subscribe(groups);
                 collar.friends().subscribe(friends);
                 collar.messaging().subscribe(messaging);
                 collar.textures().subscribe(textures);
             case DISCONNECTED:
                 plastic.display.displayStatus("Collar disconnected");
-                collar.location().unsubscribe(locations);
-                collar.friends().unsubscribe(friends);
-                collar.messaging().unsubscribe(messaging);
-                collar.textures().unsubscribe(textures);
                 break;
         }
         plugins.find().forEach(plugin -> {

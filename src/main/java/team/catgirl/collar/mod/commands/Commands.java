@@ -47,8 +47,8 @@ public class Commands {
         registerServiceCommands(dispatcher);
         registerFriendCommands(dispatcher);
         registerLocationCommands(dispatcher);
-        registerGroupCommands("party", "parties", GroupType.PARTY, dispatcher);
-        registerGroupCommands("group", "groups", GroupType.GROUP, dispatcher);
+        registerGroupCommands(GroupType.PARTY, dispatcher);
+        registerGroupCommands(GroupType.GROUP, dispatcher);
     }
 
     private void registerServiceCommands(CommandDispatcher<CollarService> dispatcher) {
@@ -125,9 +125,9 @@ public class Commands {
         );
     }
 
-    private void registerGroupCommands(String name, String plural, GroupType type, CommandDispatcher<CollarService> dispatcher) {
+    private void registerGroupCommands(GroupType type, CommandDispatcher<CollarService> dispatcher) {
         // collar party create [name]
-        dispatcher.register(literal(name)
+        dispatcher.register(literal(type.name)
                 .then(literal("create")
                         .then(argument("name", string())
                                 .executes(context -> {
@@ -141,7 +141,7 @@ public class Commands {
         );
 
         // collar party delete [name]
-        dispatcher.register(literal(name)
+        dispatcher.register(literal(type.name)
                 .then(literal("delete")
                         .then(argument("name", group(type))
                                 .executes(context -> {
@@ -155,9 +155,9 @@ public class Commands {
         );
 
         // collar party leave [name]
-        dispatcher.register(literal(name)
+        dispatcher.register(literal(type.name)
                 .then(literal("leave")
-                        .then(argument("name", string())
+                        .then(argument("name", groups())
                                 .executes(context -> {
                                     collarService.with(collar -> {
                                         collar.groups().leave(getGroup(context, "name"));
@@ -169,7 +169,7 @@ public class Commands {
         );
 
         // collar party accept [name]
-        dispatcher.register(literal(name)
+        dispatcher.register(literal(type.name)
                 .then(literal("accept"))
                 .then(argument("groupName", invitation(type)))
                 .executes(context -> {
@@ -181,7 +181,7 @@ public class Commands {
         );
 
         // collar party list
-        dispatcher.register(literal(name)
+        dispatcher.register(literal(type.name)
                 .then(literal("list")
                         .executes(context -> {
                             collarService.with(collar -> {
@@ -189,9 +189,9 @@ public class Commands {
                                         .filter(group -> group.type.equals(GroupType.PARTY))
                                         .collect(Collectors.toList());
                                 if (parties.isEmpty()) {
-                                    plastic.display.sendMessage("You are not a member of any " + plural);
+                                    plastic.display.sendMessage("You are not a member of any " + type.plural);
                                 } else {
-                                    plastic.display.sendMessage("You belong to the following " + plural + ":");
+                                    plastic.display.sendMessage("You belong to the following " + type.plural + ":");
                                     parties.forEach(group -> plastic.display.sendMessage(group.name));
                                 }
                             });
@@ -201,7 +201,7 @@ public class Commands {
         );
 
         // collar party [name] add [player]
-        dispatcher.register(literal(name)
+        dispatcher.register(literal(type.name)
                 .then(argument("groupName", group(type)))
                         .then(literal("add"))
                         .then(argument("playerName", player()))
@@ -216,7 +216,7 @@ public class Commands {
         );
 
         // collar party [name] remove [player]
-        dispatcher.register(literal(name)
+        dispatcher.register(literal(type.name)
                 .then(argument("groupName", group(type)))
                 .then(literal("remove"))
                 .then(argument("playerName", identity()))

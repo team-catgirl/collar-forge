@@ -1,5 +1,6 @@
 package team.catgirl.collar.mod;
 
+import com.mojang.brigadier.CommandDispatcher;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -42,8 +43,7 @@ public class CollarMod implements CollarListener
     private CollarService collarService;
 
     @EventHandler
-    public void preInit(FMLPreInitializationEvent event)
-    {
+    public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -51,8 +51,10 @@ public class CollarMod implements CollarListener
     @EventHandler
     public void init(FMLInitializationEvent event) {
         collarService = new CollarService(PLASTIC, TICKS, PLUGINS, logger);
-        PLASTIC.registerCommand("collar", collarService, commandDispatcher -> {
-            new Commands(collarService, PLASTIC).register(commandDispatcher);
+        PLASTIC.registerCommand("collar", collarService, () -> {
+            CommandDispatcher<CollarService> dispatcher = new CommandDispatcher<>();
+            new Commands(collarService, PLASTIC).register(dispatcher);
+            return dispatcher;
         });
     }
 

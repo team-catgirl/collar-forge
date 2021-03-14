@@ -6,6 +6,7 @@ import team.catgirl.collar.mod.plastic.world.World;
 
 import java.io.File;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Minecraft mod api abstraction
@@ -35,8 +36,8 @@ public abstract class Plastic {
      * Register a command
      * @param name name of command
      * @param source for the dispatcher
-     * @param consumer to provided the dispatcher
+     * @param supplier to provided the dispatcher
      * @param <T> of the source
      */
-    public abstract <T> void registerCommand(String name, T source, Consumer<CommandDispatcher<T>> consumer);
+    public abstract <T> void registerCommand(String name, T source, Supplier<CommandDispatcher<T>> supplier);
 }

@@ -11,8 +11,11 @@ import team.catgirl.collar.mod.plastic.forge.world.WorldForge;
 import java.io.File;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class PlasticForge extends Plastic {
+
+
     public PlasticForge() {
         super(new DisplayImpl(), new WorldForge());
     }
@@ -29,7 +32,8 @@ public class PlasticForge extends Plastic {
     }
 
     @Override
-    public <T> void registerCommand(String name, T source, Consumer<CommandDispatcher<T>> consumer) {
-        ClientCommandHandler.instance.registerCommand(new PlasticCommand(name, this, source));
+    public <T> void registerCommand(String name, T source, Supplier<CommandDispatcher<T>> supplier) {
+        CommandDispatcher<T> dispatcher = supplier.get();
+        ClientCommandHandler.instance.registerCommand(new PlasticCommand<T>(name, source, supplier.get()));
     }
 }
