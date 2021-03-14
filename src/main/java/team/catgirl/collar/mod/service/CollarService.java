@@ -12,6 +12,7 @@ import team.catgirl.collar.client.CollarListener;
 import team.catgirl.collar.client.minecraft.Ticks;
 import team.catgirl.collar.client.security.ClientIdentityStore;
 import team.catgirl.collar.mod.features.*;
+import team.catgirl.event.EventBus;
 import team.catgirl.plastic.Plastic;
 import team.catgirl.plastic.player.Player;
 import team.catgirl.plastic.world.Position;
@@ -42,11 +43,11 @@ public class CollarService implements CollarListener {
     public final Textures textures;
     public final Groups groups;
 
-    public CollarService(Plastic plastic, Ticks ticks, Plugins plugins, Logger logger) {
+    public CollarService(Plastic plastic, EventBus eventBus, Ticks ticks, Plugins plugins, Logger logger) {
         this.plastic = plastic;
         this.ticks = ticks;
         this.plugins = plugins;
-        this.locations = new Locations(plastic);
+        this.locations = new Locations(plastic, eventBus);
         this.friends = new Friends(plastic);
         this.messaging = new Messaging(plastic);
         this.textures = new Textures(plastic);

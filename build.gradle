@@ -77,6 +77,7 @@ dependencies {
     compile group: 'team.catgirl.collar', name: 'client', version: '1.0-SNAPSHOT', classifier: 'full'
     compile group: 'team.catgirl.collar', name: 'plugin', version: '1.0-SNAPSHOT'
     compile 'com.mojang:brigadier:1.0.17'
+    implementation group: 'info.journeymap', name: 'journeymap-api', version: '1.12-1.4'
 
     // Real examples
     // compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
