@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package team.catgirl.plastic.forge;
+package team.catgirl.plastic.forge.ui;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("NullableProblems")
-public final class PlasticCommand<T> extends CommandBase {
+public final class ForgeCommand<T> extends CommandBase {
 	private final String name;
 	private final T source;
 
@@ -50,7 +50,7 @@ public final class PlasticCommand<T> extends CommandBase {
 		return name;
 	}
 
-	public PlasticCommand(String name, T source, CommandDispatcher<T> dispatcher) {
+	public ForgeCommand(String name, T source, CommandDispatcher<T> dispatcher) {
 		this.name = name;
 		this.source = source;
 		this.commandDispatcher = dispatcher;

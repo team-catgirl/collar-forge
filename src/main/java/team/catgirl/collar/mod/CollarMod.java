@@ -18,7 +18,7 @@ import team.catgirl.collar.client.CollarListener;
 import team.catgirl.collar.client.minecraft.Ticks;
 import team.catgirl.collar.mod.commands.Commands;
 import team.catgirl.plastic.Plastic;
-import team.catgirl.plastic.forge.PlasticForge;
+import team.catgirl.plastic.forge.ForgePlastic;
 import team.catgirl.collar.mod.plugins.ForgePlugins;
 import team.catgirl.collar.mod.plugins.Plugins;
 import team.catgirl.collar.mod.service.CollarService;
@@ -38,7 +38,7 @@ public class CollarMod implements CollarListener
     private static boolean isWorldLoaded = true;
     private static boolean isConnectedToServer = false;
     private static final Plugins PLUGINS = new ForgePlugins();
-    private static final Plastic PLASTIC = new PlasticForge();
+    private static final Plastic PLASTIC = new ForgePlastic();
 
     private CollarService collarService;
 
@@ -51,11 +51,7 @@ public class CollarMod implements CollarListener
     @EventHandler
     public void init(FMLInitializationEvent event) {
         collarService = new CollarService(PLASTIC, TICKS, PLUGINS, logger);
-        PLASTIC.registerCommand("collar", collarService, () -> {
-            CommandDispatcher<CollarService> dispatcher = new CommandDispatcher<>();
-            new Commands(collarService, PLASTIC).register(dispatcher);
-            return dispatcher;
-        });
+        PLASTIC.commands.register("collar", collarService, new Commands(collarService, PLASTIC).create());
     }
 
     @SubscribeEvent

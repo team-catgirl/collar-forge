@@ -4,16 +4,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import team.catgirl.plastic.player.Player;
 import team.catgirl.plastic.world.World;
-import team.catgirl.plastic.forge.player.PlayerForge;
+import team.catgirl.plastic.forge.player.ForgePlayer;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class WorldForge implements World {
+public class ForgeWorld implements World {
 
     private net.minecraft.world.World world;
 
-    public WorldForge() {
+    public ForgeWorld() {
         this.world = Minecraft.getMinecraft().world;
     }
 
@@ -22,13 +22,13 @@ public class WorldForge implements World {
         EntityPlayer entityPlayer = Minecraft.getMinecraft().world.playerEntities.stream()
                 .filter(player -> player.getEntityId() == Minecraft.getMinecraft().player.getEntityId())
                 .findFirst().orElseThrow(() -> new IllegalStateException("could not find current player"));
-        return new PlayerForge(entityPlayer);
+        return new ForgePlayer(entityPlayer);
     }
 
     @Override
     public List<Player> allPlayers() {
         return Minecraft.getMinecraft().world.playerEntities.stream()
-                .map(PlayerForge::new)
+                .map(ForgePlayer::new)
                 .collect(Collectors.toList());
     }
 }

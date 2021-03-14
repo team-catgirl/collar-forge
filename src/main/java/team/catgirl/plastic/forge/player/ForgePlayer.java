@@ -9,10 +9,10 @@ import team.catgirl.plastic.world.Position;
 
 import java.util.UUID;
 
-public class PlayerForge implements Player {
+public class ForgePlayer implements Player {
     public final EntityPlayer player;
 
-    public PlayerForge(EntityPlayer player) {
+    public ForgePlayer(EntityPlayer player) {
         this.player = player;
     }
 

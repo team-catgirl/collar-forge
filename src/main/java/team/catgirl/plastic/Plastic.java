@@ -1,22 +1,34 @@
 package team.catgirl.plastic;
 
-import com.mojang.brigadier.CommandDispatcher;
+import team.catgirl.plastic.ui.Commands;
 import team.catgirl.plastic.ui.Display;
 import team.catgirl.plastic.world.World;
 
 import java.io.File;
-import java.util.function.Supplier;
 
 /**
  * Minecraft mod api abstraction
  */
 public abstract class Plastic {
+    /**
+     * UI display
+     */
     public final Display display;
+
+    /**
+     * The World
+     */
     public final World world;
 
-    protected Plastic(Display display, World world) {
+    /**
+     * Command registration
+     */
+    public final Commands commands;
+
+    protected Plastic(Display display, World world, Commands commands) {
         this.display = display;
         this.world = world;
+        this.commands = commands;
     }
 
     /**
@@ -30,13 +42,4 @@ public abstract class Plastic {
      * @return serverIP or null if not connected
      */
     public abstract String serverIp();
-
-    /**
-     * Register a command
-     * @param name name of command
-     * @param source for the dispatcher
-     * @param supplier to provided the dispatcher
-     * @param <T> of the source
-     */
-    public abstract <T> void registerCommand(String name, T source, Supplier<CommandDispatcher<T>> supplier);
 }

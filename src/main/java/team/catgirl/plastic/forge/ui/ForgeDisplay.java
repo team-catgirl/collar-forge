@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.TextComponentString;
 import team.catgirl.plastic.ui.Display;
 
-public class DisplayImpl implements Display {
+public class ForgeDisplay implements Display {
     
     @Override
     public void displayStatus(String message) {

@@ -43,13 +43,15 @@ public class Commands {
         this.plastic = plastic;
     }
 
-    public void register(CommandDispatcher<CollarService> dispatcher) {
+    public CommandDispatcher<CollarService> create() {
+        CommandDispatcher<CollarService> dispatcher = new CommandDispatcher<>();
         registerServiceCommands(dispatcher);
         registerFriendCommands(dispatcher);
         registerLocationCommands(dispatcher);
         registerWaypointCommands(dispatcher);
         registerGroupCommands(GroupType.PARTY, dispatcher);
         registerGroupCommands(GroupType.GROUP, dispatcher);
+        return dispatcher;
     }
 
     private void registerServiceCommands(CommandDispatcher<CollarService> dispatcher) {
@@ -102,6 +104,8 @@ public class Commands {
                             collar.friends().addFriend(new MinecraftPlayer(player.player.id(), collar.player().minecraftPlayer.server));
                         } else if (player.profile != null) {
                             collar.friends().addFriend(player.profile.id);
+                        } else {
+                            throw new IllegalStateException("was not profile or player");
                         }
                     });
                     return 1;
@@ -127,43 +131,35 @@ public class Commands {
         // collar party create [name]
         dispatcher.register(literal(type.name)
                 .then(literal("create")
-                        .then(argument("name", string())
-                                .executes(context -> {
-                                    collarService.with(collar -> {
-                                        collar.groups().create(getString(context, "name"), GroupType.PARTY, ImmutableList.of());
-                                    });
-                                    return 1;
-                                })
-                        )
-                )
-        );
+                .then(argument("name", string())
+                .executes(context -> {
+                    collarService.with(collar -> {
+                        collar.groups().create(getString(context, "name"), GroupType.PARTY, ImmutableList.of());
+                    });
+                    return 1;
+                }))));
 
         // collar party delete [name]
         dispatcher.register(literal(type.name)
                 .then(literal("delete")
-                        .then(argument("name", group(type))
-                                .executes(context -> {
-                                    collarService.with(collar -> {
-                                        collar.groups().delete(getGroup(context, "name"));
-                                    });
-                                    return 1;
-                                })
-                        )
-                )
-        );
+                .then(argument("name", group(type))
+                .executes(context -> {
+                    collarService.with(collar -> {
+                        collar.groups().delete(getGroup(context, "name"));
+                    });
+                    return 1;
+                }))));
 
         // collar party leave [name]
         dispatcher.register(literal(type.name)
                 .then(literal("leave")
                 .then(argument("name", group(type))
-                        .executes(context -> {
-                            collarService.with(collar -> {
-                                collar.groups().leave(getGroup(context, "name"));
-                            });
-                            return 1;
-                        })
-                )
-                ));
+                .executes(context -> {
+                    collarService.with(collar -> {
+                        collar.groups().leave(getGroup(context, "name"));
+                    });
+                    return 1;
+                }))));
 
         // collar party accept [name]
         dispatcher.register(literal(type.name)
@@ -179,22 +175,20 @@ public class Commands {
         // collar party list
         dispatcher.register(literal(type.name)
                 .then(literal("list")
-                        .executes(context -> {
-                            collarService.with(collar -> {
-                                List<Group> parties = collar.groups().all().stream()
-                                        .filter(group -> group.type.equals(type))
-                                        .collect(Collectors.toList());
-                                if (parties.isEmpty()) {
-                                    plastic.display.sendMessage("You are not a member of any " + type.plural);
-                                } else {
-                                    plastic.display.sendMessage("You belong to the following " + type.plural + ":");
-                                    parties.forEach(group -> plastic.display.sendMessage(group.name));
-                                }
-                            });
-                            return 1;
-                        })
-                )
-        );
+                .executes(context -> {
+                    collarService.with(collar -> {
+                        List<Group> parties = collar.groups().all().stream()
+                                .filter(group -> group.type.equals(type))
+                                .collect(Collectors.toList());
+                        if (parties.isEmpty()) {
+                            plastic.display.sendMessage("You are not a member of any " + type.plural);
+                        } else {
+                            plastic.display.sendMessage("You belong to the following " + type.plural + ":");
+                            parties.forEach(group -> plastic.display.sendMessage(group.name));
+                        }
+                    });
+                    return 1;
+                })));
 
         // collar party [name] add [player]
         dispatcher.register(literal(type.name)
