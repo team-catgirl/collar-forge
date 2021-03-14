@@ -1,4 +1,4 @@
-/**
+/*
  * MIT License
  *
  * Copyright (c) 2020 Headpat Services
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package team.catgirl.collar.mod.forge.commands;
+package team.catgirl.collar.mod.commands.arguments;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -29,27 +29,18 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import org.jetbrains.annotations.Contract;
-import services.headpat.forgeextensions.utils.PlayerUtils;
+import team.catgirl.plastic.Plastic;
+import team.catgirl.plastic.player.Player;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public class PlayerArgumentType implements ArgumentType<EntityPlayerMP> {
-	private PlayerArgumentType() {
-	}
+public class PlayerArgumentType implements ArgumentType<Player> {
+	private final Plastic plastic;
 
-	/**
-	 * Shortcut to create a new {@link PlayerArgumentType} instance.
-	 *
-	 * @return {@link PlayerArgumentType} instance.
-	 */
-	@Contract(value = " -> new", pure = true)
-	public static PlayerArgumentType player() {
-		return new PlayerArgumentType();
+	public PlayerArgumentType(Plastic plastic) {
+		this.plastic = plastic;
 	}
 
 	/**
@@ -59,30 +50,29 @@ public class PlayerArgumentType implements ArgumentType<EntityPlayerMP> {
 	 * @param name    Name of the argument.
 	 * @return The player specified by the argument name in the command context.
 	 */
-	public static EntityPlayerMP getPlayer(CommandContext<?> context, String name) {
-		return context.getArgument(name, EntityPlayerMP.class);
+	public static Player getPlayer(CommandContext<?> context, String name) {
+		return context.getArgument(name, Player.class);
 	}
 
 	@Override
-	public EntityPlayerMP parse(StringReader reader) throws CommandSyntaxException {
-		EntityPlayerMP player = PlayerUtils.getPlayerList().getPlayerByUsername(reader.readUnquotedString());
-		if (player == null) {
-			throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("player not found.");
-		} else
-			return player;
+	public Player parse(StringReader reader) throws CommandSyntaxException {
+		return plastic.world.allPlayers().stream()
+				.filter(thePlayer -> thePlayer.name().equals(reader.readUnquotedString()))
+				.findFirst().orElseThrow(() -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create("player not found"));
 	}
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-		PlayerUtils.getPlayerList().getPlayers().forEach(player -> {
-			if (player.getName().toLowerCase().startsWith(builder.getRemaining().toLowerCase()))
-				builder.suggest(player.getName());
+		plastic.world.allPlayers().forEach(player -> {
+			if (player.name().toLowerCase().startsWith(builder.getRemaining().toLowerCase())) {
+				builder.suggest(player.name());
+			}
 		});
 		return builder.buildFuture();
 	}
 
 	@Override
 	public Collection<String> getExamples() {
-		return PlayerUtils.getPlayerList().getPlayers().stream().map(EntityPlayer::getName).collect(Collectors.toList());
+		return plastic.world.allPlayers().stream().map(Player::name).collect(Collectors.toList());
 	}
 }

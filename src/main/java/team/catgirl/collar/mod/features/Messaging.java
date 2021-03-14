@@ -10,9 +10,19 @@ import team.catgirl.collar.api.session.Player;
 import team.catgirl.collar.client.Collar;
 import team.catgirl.collar.client.api.messaging.MessagingApi;
 import team.catgirl.collar.client.api.messaging.MessagingListener;
+import team.catgirl.plastic.Plastic;
 import team.catgirl.collar.security.mojang.MinecraftPlayer;
 
+/**
+ * TODO: move all the magic out of here into Plastic
+ */
 public class Messaging implements MessagingListener {
+
+    private final Plastic plastic;
+
+    public Messaging(Plastic plastic) {
+        this.plastic = plastic;
+    }
 
     /**
      *  When we know the message was delivered securely we should echo it in the senders chat
@@ -55,7 +65,7 @@ public class Messaging implements MessagingListener {
             TextMessage textMessage = (TextMessage) message;
             TextComponentString textComponentString = new TextComponentString(textMessage.content);
             textComponentString.getStyle().setColor(TextFormatting.LIGHT_PURPLE);
-            Minecraft.getMinecraft().player.sendMessage(textComponentString);
+            plastic.display.sendMessage(textComponentString.getText());
         }
     }
 
@@ -72,6 +82,6 @@ public class Messaging implements MessagingListener {
     private void displayConsoleMessage(TextMessage textMessage, TextFormatting color) {
         TextComponentString textComponentString = new TextComponentString(textMessage.consoleMessage);
         textComponentString.getStyle().setColor(color);
-        Minecraft.getMinecraft().player.sendMessage(textComponentString);
+        plastic.display.sendMessage(textMessage.consoleMessage);
     }
 }
