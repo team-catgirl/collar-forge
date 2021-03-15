@@ -22,6 +22,7 @@ jobs:
     - uses: actions/checkout@master
       with:
         repository: team-catgirl/collar
+        path: collar
     - name: build collar
       run: mvn clean install
       working-directory: collar
