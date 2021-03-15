@@ -46,7 +46,7 @@ public class Locations implements LocationListener {
         plastic.display.sendMessage(message);
         Position position = getPosition(waypoint.location);
         Dimension dimension = getDimension(waypoint.location.dimension);
-        events.dispatch(new WaypointCreatedEvent(waypoint.id, waypoint.name, position, dimension));
+        events.dispatch(new WaypointCreatedEvent(waypoint.id, waypoint.name, group == null ? null : group.name, position, dimension));
     }
 
     @Override
@@ -64,7 +64,7 @@ public class Locations implements LocationListener {
 
     @Override
     public void onPrivateWaypointsReceived(Collar collar, LocationApi locationApi, Set<Waypoint> privateWaypoints) {
-        privateWaypoints.forEach(waypoint -> events.dispatch(new WaypointCreatedEvent(waypoint.id, waypoint.name, getPosition(waypoint.location), getDimension(waypoint.location.dimension))));
+        privateWaypoints.forEach(waypoint -> events.dispatch(new WaypointCreatedEvent(waypoint.id, waypoint.name, null, getPosition(waypoint.location), getDimension(waypoint.location.dimension))));
     }
 
     @Override

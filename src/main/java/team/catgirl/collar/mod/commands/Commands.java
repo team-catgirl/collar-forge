@@ -288,6 +288,17 @@ public class Commands {
                     return 1;
                 }))));
 
+        // collar waypoint remove [name]
+        dispatcher.register(literal("waypoint")
+                .then(literal("remove")
+                .then(argument("name", privateWaypoint())
+                .executes(context -> {
+                    collarService.with(collar -> {
+                        WaypointArgument argument = context.getArgument("name", WaypointArgument.class);
+                        collar.location().removeWaypoint(argument.waypoint);
+                    });
+                    return 1;
+                }))));
 
         // collar location waypoint list
         dispatcher.register(literal("waypoint")
@@ -304,40 +315,6 @@ public class Commands {
                     return 1;
                 })));
 
-        // collar location waypoint list
-        dispatcher.register(literal("waypoint")
-                .then(literal("list")
-                .then(argument("group", groups()))
-                        .executes(context -> {
-                            collarService.with(collar -> {
-                                Map<Waypoint, Group> waypointGroups = new LinkedHashMap<>();
-                                for (Group group : collar.groups().all()) {
-                                    Set<Waypoint> waypoints = collar.location().groupWaypoints(group);
-                                    waypoints.forEach(waypoint -> waypointGroups.put(waypoint, group));
-                                }
-                                if (waypointGroups.isEmpty()) {
-                                    plastic.display.sendMessage("You have no group waypoints");
-                                } else {
-                                    waypointGroups.forEach((key, value) -> plastic.display.sendMessage(key.displayName() + " (" + value.type.name + " '" + value.name + "')"));
-                                }
-                            });
-                            return 1;
-                        })));
-
-        // collar waypoint remove [name]
-        dispatcher.register(literal("waypoint")
-                .then(literal("remove")
-                .then(argument("name", privateWaypoint())
-                .executes(context -> {
-                    collarService.with(collar -> {
-                        WaypointArgument argument = context.getArgument("name", WaypointArgument.class);
-                        collar.location().removeWaypoint(argument.waypoint);
-                    });
-                    return 1;
-                }))));
-
-
-
         // collar location waypoint list [any group name]
         dispatcher.register(literal("waypoint")
                 .then(literal("list")
@@ -347,7 +324,7 @@ public class Commands {
                         Group group = getGroup(context, "group");
                         Set<Waypoint> waypoints = collar.location().groupWaypoints(group);
                         if (waypoints.isEmpty()) {
-                            plastic.display.sendMessage("You have no private waypoints");
+                            plastic.display.sendMessage("You have no group waypoints");
                         } else {
                             waypoints.forEach(waypoint -> plastic.display.sendMessage(waypoint.displayName()));
                         }
@@ -367,6 +344,7 @@ public class Commands {
                 .then(argument("group", groups())
                 .executes(context -> {
                     collarService.with(collar -> {
+                        Group group = getGroup(context, "group");
                         Dimension dimension = context.getArgument("dimension", Dimension.class);
                         Location location = new Location(
                                 getDouble(context, "x"),
@@ -374,7 +352,7 @@ public class Commands {
                                 getDouble(context, "z"),
                                 dimension
                         );
-                        collar.location().addWaypoint(getString(context, "name"), location);
+                        collar.location().addWaypoint(group, getString(context, "name"), location);
                     });
                     return 1;
                 }))))))))));

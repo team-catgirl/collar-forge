@@ -11,6 +11,7 @@ import team.catgirl.collar.mod.commands.exceptions.CommandTargetNotFoundExceptio
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -25,8 +26,8 @@ public class DimensionArgumentType implements ArgumentType<Dimension> {
     @Override
     public Dimension parse(StringReader reader) throws CommandSyntaxException {
         String input = reader.readUnquotedString();
-        return dimensions().stream().filter(dimension -> input.equals(dimension))
-                .findFirst().map(Dimension::valueOf)
+        return dimensions().stream().filter(dimension -> input.toLowerCase().equals(dimension.toLowerCase(Locale.ROOT)))
+                .findFirst().map(s -> Dimension.valueOf(s.toUpperCase()))
                 .orElseThrow(() -> new CommandTargetNotFoundException("dimension '" + reader.readUnquotedString() +  "' not found"));
     }
 
@@ -44,6 +45,7 @@ public class DimensionArgumentType implements ArgumentType<Dimension> {
     }
 
     private List<String> dimensions() {
-        return stream(Dimension.values()).filter(dimension -> dimension == Dimension.UNKNOWN).map(dimension -> dimension.name().toLowerCase()).collect(Collectors.toList());
+        return stream(Dimension.values()).filter(dimension -> dimension != Dimension.UNKNOWN)
+                .map(dimension -> dimension.name().toLowerCase()).collect(Collectors.toList());
     }
 }

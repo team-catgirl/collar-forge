@@ -74,7 +74,14 @@ public class JourneyMapMod implements IClientPlugin {
 
     @Subscribe
     public void onWaypointCreated(WaypointCreatedEvent event) {
-        Waypoint playerWaypoint = waypointFrom(event.name, null, event.position, event.dimension);
+        StringBuilder sb = new StringBuilder();
+        sb.append(event.name);
+        if (event.groupName != null) {
+            sb.append(" (");
+            sb.append(event.groupName);
+            sb.append(")");
+        }
+        Waypoint playerWaypoint = waypointFrom(sb.toString(), null, event.position, event.dimension);
         privateWaypoints.put(event.id, playerWaypoint);
         show(playerWaypoint);
     }
