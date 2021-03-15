@@ -3,6 +3,9 @@ package team.catgirl.plastic.player;
 import team.catgirl.plastic.world.Position;
 import team.catgirl.plastic.world.Dimension;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface Player {
@@ -30,4 +33,9 @@ public interface Player {
      * @return current dimension
      */
     Dimension dimension();
+
+    /**
+     * @return player's avatar
+     */
+    Optional<BufferedImage> avatar();
 }

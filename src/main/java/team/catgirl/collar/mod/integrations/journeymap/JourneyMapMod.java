@@ -2,19 +2,23 @@ package team.catgirl.collar.mod.integrations.journeymap;
 
 import journeymap.client.api.IClientAPI;
 import journeymap.client.api.IClientPlugin;
+import journeymap.client.api.display.Waypoint;
 import journeymap.client.api.event.ClientEvent;
+import journeymap.client.api.model.MapImage;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
-import team.catgirl.collar.mod.forge.CollarMod;
 import team.catgirl.collar.mod.features.events.PlayerLocationUpdatedEvent;
 import team.catgirl.collar.mod.features.events.WaypointCreatedEvent;
 import team.catgirl.collar.mod.features.events.WaypointDeletedEvent;
+import team.catgirl.collar.mod.forge.CollarMod;
 import team.catgirl.collar.mod.service.events.CollarConnectedEvent;
 import team.catgirl.collar.mod.service.events.CollarDisconnectedEvent;
 import team.catgirl.event.Subscribe;
 import team.catgirl.plastic.Plastic;
 import team.catgirl.plastic.world.Dimension;
 import team.catgirl.plastic.world.Position;
+
+import java.awt.image.BufferedImage;
 
 @journeymap.client.api.ClientPlugin
 public class JourneyMapMod implements IClientPlugin {
@@ -39,7 +43,8 @@ public class JourneyMapMod implements IClientPlugin {
     @Subscribe
     public void onPlayerLocationUpdated(PlayerLocationUpdatedEvent event) {
         if (!event.player.id().equals(plastic.world.currentPlayer().id())) {
-            journeymap.client.api.display.Waypoint playerWaypoint = waypointFrom(event.player.name(), event.position, event.dimension);
+            BufferedImage icon = event.player.avatar().orElse(null);
+            journeymap.client.api.display.Waypoint playerWaypoint = waypointFrom(event.player.name(), icon, event.position, event.dimension);
             if (event.position.equals(Position.UNKNOWN)) {
                 journeyMap.remove(playerWaypoint);
             } else {
@@ -60,12 +65,12 @@ public class JourneyMapMod implements IClientPlugin {
 
     @Subscribe
     public void onWaypointCreated(WaypointCreatedEvent event) {
-        show(waypointFrom(event.name, event.position, event.dimension));
+        show(waypointFrom(event.name, null, event.position, event.dimension));
     }
 
     @Subscribe
     public void onWaypointDeleted(WaypointDeletedEvent event) {
-        journeyMap.remove(waypointFrom(event.name, event.position, event.dimension));
+        journeyMap.remove(waypointFrom(event.name, null, event.position, event.dimension));
     }
 
     private void show(journeymap.client.api.display.Waypoint playerWaypoint) {
@@ -76,7 +81,7 @@ public class JourneyMapMod implements IClientPlugin {
         }
     }
 
-    private journeymap.client.api.display.Waypoint waypointFrom(String name, Position position, Dimension dimension) {
+    private journeymap.client.api.display.Waypoint waypointFrom(String name, BufferedImage icon, Position position, Dimension dimension) {
         int dimensionId;
         switch (dimension) {
             case OVERWORLD:
@@ -91,11 +96,15 @@ public class JourneyMapMod implements IClientPlugin {
             default:
                 throw new IllegalStateException("could not get dimension id of " + dimension);
         }
-        return new journeymap.client.api.display.Waypoint(
+        Waypoint waypoint = new Waypoint(
                 CollarMod.MODID,
                 name,
                 dimensionId,
                 new BlockPos(position.x, position.y, position.z)
         );
+        if (icon != null) {
+            waypoint.setIcon(new MapImage(icon));
+        }
+        return waypoint;
     }
 }
