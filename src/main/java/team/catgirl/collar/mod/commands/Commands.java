@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import team.catgirl.collar.api.friends.Friend;
+import team.catgirl.collar.api.friends.Status;
 import team.catgirl.collar.api.groups.Group;
 import team.catgirl.collar.api.groups.GroupType;
 import team.catgirl.collar.api.location.Dimension;
@@ -16,10 +17,12 @@ import team.catgirl.collar.mod.commands.arguments.IdentityArgumentType.IdentityA
 import team.catgirl.collar.mod.commands.arguments.WaypointArgumentType.WaypointArgument;
 import team.catgirl.plastic.Plastic;
 import team.catgirl.plastic.player.Player;
+import team.catgirl.plastic.ui.TextFormatting;
 import team.catgirl.plastic.world.Position;
 import team.catgirl.collar.mod.service.CollarService;
 import team.catgirl.collar.security.mojang.MinecraftPlayer;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -120,7 +123,10 @@ public class Commands {
                         if (friends.isEmpty()) {
                             plastic.display.sendMessage("You don't have any friends");
                         } else {
-                            friends.forEach(friend -> plastic.display.sendMessage(friend.friend.name));
+                            friends.stream().sorted(Comparator.comparing(o -> o.status)).forEach(friend -> {
+                                TextFormatting color = friend.status.equals(Status.ONLINE) ? TextFormatting.GREEN : TextFormatting.GRAY;
+                                plastic.display.sendMessage(plastic.display.newTextBuilder().add(friend.friend.name, color).formatted());
+                            });
                         }
                     });
                     return 1;
