@@ -45,6 +45,7 @@ jobs:
       working-directory: mod
     - name: Setup workspace
       run: ./gradlew setupDecompWorkspace
+      working-directory: mod
     - name: Build with Gradle
       run: ./gradlew build
       working-directory: mod
