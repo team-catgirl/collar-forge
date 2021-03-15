@@ -22,9 +22,7 @@ import team.catgirl.plastic.world.Position;
 import team.catgirl.collar.mod.service.CollarService;
 import team.catgirl.collar.security.mojang.MinecraftPlayer;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg;
@@ -306,6 +304,26 @@ public class Commands {
                     return 1;
                 })));
 
+        // collar location waypoint list
+        dispatcher.register(literal("waypoint")
+                .then(literal("list")
+                .then(argument("group", groups()))
+                        .executes(context -> {
+                            collarService.with(collar -> {
+                                Map<Waypoint, Group> waypointGroups = new LinkedHashMap<>();
+                                for (Group group : collar.groups().all()) {
+                                    Set<Waypoint> waypoints = collar.location().groupWaypoints(group);
+                                    waypoints.forEach(waypoint -> waypointGroups.put(waypoint, group));
+                                }
+                                if (waypointGroups.isEmpty()) {
+                                    plastic.display.sendMessage("You have no group waypoints");
+                                } else {
+                                    waypointGroups.forEach((key, value) -> plastic.display.sendMessage(key.displayName() + " (" + value.type.name + " '" + value.name + "')"));
+                                }
+                            });
+                            return 1;
+                        })));
+
         // collar waypoint remove [name]
         dispatcher.register(literal("waypoint")
                 .then(literal("remove")
@@ -337,7 +355,7 @@ public class Commands {
                     return 1;
                 }))));
 
-        // collar location waypoint add [name] [x] [y] [z] with [group]
+        // collar location waypoint add [name] [x] [y] [z] to [group]
         dispatcher.register(literal("waypoint")
                 .then(literal("add")
                 .then(argument("name", string())
@@ -345,6 +363,8 @@ public class Commands {
                 .then(argument("y", doubleArg())
                 .then(argument("z", doubleArg())
                 .then(argument("dimension", dimension())
+                .then(literal("to")
+                .then(argument("group", groups())
                 .executes(context -> {
                     collarService.with(collar -> {
                         Dimension dimension = context.getArgument("dimension", Dimension.class);
@@ -357,7 +377,7 @@ public class Commands {
                         collar.location().addWaypoint(getString(context, "name"), location);
                     });
                     return 1;
-                }))))))));
+                }))))))))));
 
         // collar location waypoint remove [name] from [group]
         dispatcher.register(literal("waypoint")
