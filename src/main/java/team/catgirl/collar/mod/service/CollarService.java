@@ -12,6 +12,8 @@ import team.catgirl.collar.client.CollarListener;
 import team.catgirl.collar.client.minecraft.Ticks;
 import team.catgirl.collar.client.security.ClientIdentityStore;
 import team.catgirl.collar.mod.features.*;
+import team.catgirl.collar.mod.service.events.CollarConnectedEvent;
+import team.catgirl.collar.mod.service.events.CollarDisconnectedEvent;
 import team.catgirl.event.EventBus;
 import team.catgirl.plastic.Plastic;
 import team.catgirl.plastic.player.Player;
@@ -36,6 +38,7 @@ public class CollarService implements CollarListener {
     private final ExecutorService backgroundJobs;
     private Collar collar;
     private final Plastic plastic;
+    private final EventBus eventBus;
     private final Ticks ticks;
     private final Plugins plugins;
     private final Logger logger;
@@ -48,6 +51,7 @@ public class CollarService implements CollarListener {
 
     public CollarService(Plastic plastic, EventBus eventBus, Ticks ticks, Plugins plugins, Logger logger) {
         this.plastic = plastic;
+        this.eventBus = eventBus;
         this.ticks = ticks;
         this.plugins = plugins;
         this.locations = new Locations(plastic, eventBus);
@@ -110,6 +114,7 @@ public class CollarService implements CollarListener {
                 case CONNECTING:
                     formatted = this.plastic.display.newTextBuilder().add("Collar connecting...", TextFormatting.GREEN).formatted();
                     plastic.display.sendMessage(formatted);
+                    eventBus.dispatch(new CollarConnectedEvent());
                     break;
                 case CONNECTED:
                     formatted = this.plastic.display.newTextBuilder().add("Collar connected", TextFormatting.GREEN).formatted();
@@ -123,6 +128,7 @@ public class CollarService implements CollarListener {
                 case DISCONNECTED:
                     formatted = this.plastic.display.newTextBuilder().add("Collar disconnected", TextFormatting.GREEN).formatted();
                     plastic.display.sendMessage(formatted);
+                    eventBus.dispatch(new CollarDisconnectedEvent());
                     break;
             }
             plugins.find().forEach(plugin -> {

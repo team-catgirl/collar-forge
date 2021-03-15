@@ -14,6 +14,8 @@ import team.catgirl.collar.mod.CollarMod;
 import team.catgirl.collar.mod.features.events.PlayerLocationUpdatedEvent;
 import team.catgirl.collar.mod.features.events.WaypointCreatedEvent;
 import team.catgirl.collar.mod.features.events.WaypointDeletedEvent;
+import team.catgirl.collar.mod.service.events.CollarConnectedEvent;
+import team.catgirl.collar.mod.service.events.CollarDisconnectedEvent;
 import team.catgirl.event.Subscribe;
 import team.catgirl.plastic.Plastic;
 import team.catgirl.plastic.world.Dimension;
@@ -51,6 +53,16 @@ public class JourneyMapMod implements IClientPlugin {
                 show(playerWaypoint);
             }
         }
+    }
+
+    @Subscribe
+    public void onConnected(CollarConnectedEvent event) {
+        journeyMap.removeAll(CollarMod.MODID);
+    }
+
+    @Subscribe
+    public void onDisconnected(CollarDisconnectedEvent event) {
+        journeyMap.removeAll(CollarMod.MODID);
     }
 
     @Subscribe
