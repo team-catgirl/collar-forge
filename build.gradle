@@ -16,6 +16,7 @@ apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 version = '0.1'
 group = 'team.catgirl.collar.mod'
@@ -116,20 +117,22 @@ jar {
     }
 }
 
-//shadowJar {
-//    // Only shadow collar
-//    dependencies {
-//        include(dependency('team.catgirl.collar:client:.*'))
-//    }
-//
-//    // Replace com.yourpackage with your mods package
-//    relocate 'team.catgirl.collar', 'team.catgirl.collar'
-//
-//    classifier '' // Replace the default JAR
-//}
-//reobf {
-//    shadowJar {} // Reobfuscate the shadowed JAR
-//}
+shadowJar {
+    // Only shadow collar
+    dependencies {
+        include(dependency('team.catgirl.collar:client:.*'))
+        include(dependency('team.catgirl.collar:plugin:.*'))
+        include(dependency('com.mojang:brigadier:.*'))
+    }
+
+    // Replace com.yourpackage with your mods package
+//    relocate 'com.mojang.brigadier', 'team.catgirl.collar.libs.com.mojang.brigadier'
+
+    classifier '' // Replace the default JAR
+}
+reobf {
+    shadowJar {} // Reobfuscate the shadowed JAR
+}
 
 // Example configuration to allow publishing using the maven-publish task
 // This is the preferred method to reobfuscate your jar file
