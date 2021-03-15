@@ -1,4 +1,4 @@
-package team.catgirl.collar.mod;
+package team.catgirl.collar.mod.forge;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
@@ -16,7 +16,6 @@ import org.apache.logging.log4j.Logger;
 import team.catgirl.collar.client.CollarListener;
 import team.catgirl.collar.client.minecraft.Ticks;
 import team.catgirl.collar.mod.commands.Commands;
-import team.catgirl.collar.mod.plugins.ForgePlugins;
 import team.catgirl.collar.mod.plugins.Plugins;
 import team.catgirl.collar.mod.service.CollarService;
 import team.catgirl.event.EventBus;

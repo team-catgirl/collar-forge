@@ -1,16 +1,11 @@
-package team.catgirl.collar.mod.journeymap;
+package team.catgirl.collar.mod.integrations.journeymap;
 
 import journeymap.client.api.IClientAPI;
 import journeymap.client.api.IClientPlugin;
 import journeymap.client.api.event.ClientEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
-import team.catgirl.collar.api.location.Location;
-import team.catgirl.collar.api.session.Player;
-import team.catgirl.collar.api.waypoints.Waypoint;
-import team.catgirl.collar.client.Collar;
-import team.catgirl.collar.client.api.location.LocationApi;
-import team.catgirl.collar.mod.CollarMod;
+import team.catgirl.collar.mod.forge.CollarMod;
 import team.catgirl.collar.mod.features.events.PlayerLocationUpdatedEvent;
 import team.catgirl.collar.mod.features.events.WaypointCreatedEvent;
 import team.catgirl.collar.mod.features.events.WaypointDeletedEvent;
@@ -20,8 +15,6 @@ import team.catgirl.event.Subscribe;
 import team.catgirl.plastic.Plastic;
 import team.catgirl.plastic.world.Dimension;
 import team.catgirl.plastic.world.Position;
-
-import static team.catgirl.plastic.world.Dimension.*;
 
 @journeymap.client.api.ClientPlugin
 public class JourneyMapMod implements IClientPlugin {

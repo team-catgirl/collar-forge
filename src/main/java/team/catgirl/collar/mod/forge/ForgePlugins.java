@@ -1,7 +1,8 @@
-package team.catgirl.collar.mod.plugins;
+package team.catgirl.collar.mod.forge;
 
 import net.minecraftforge.fml.common.Loader;
 import team.catgirl.collar.api.CollarPlugin;
+import team.catgirl.collar.mod.plugins.Plugins;
 
 import java.util.stream.Stream;
 
