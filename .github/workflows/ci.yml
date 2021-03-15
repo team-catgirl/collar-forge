@@ -48,3 +48,8 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build
       working-directory: mod
+    - name: Upload collar-client.jar
+      uses: actions/upload-artifact@v2
+      with:
+        name: collar-client.jar
+        path: mod/build/build/libs/team.catgirl.collar*.jar
