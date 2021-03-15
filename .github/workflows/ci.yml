@@ -24,6 +24,7 @@ jobs:
         name: team-catgirl/collar 
     - name: build collar
       run: mvn clean install
+      working-directory: collar
     - uses: actions/checkout@v2
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
