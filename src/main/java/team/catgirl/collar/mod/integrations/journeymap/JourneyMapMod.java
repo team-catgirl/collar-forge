@@ -15,16 +15,22 @@ import team.catgirl.collar.mod.service.events.CollarConnectedEvent;
 import team.catgirl.collar.mod.service.events.CollarDisconnectedEvent;
 import team.catgirl.event.Subscribe;
 import team.catgirl.plastic.Plastic;
+import team.catgirl.plastic.player.Player;
 import team.catgirl.plastic.world.Dimension;
 import team.catgirl.plastic.world.Position;
 
 import java.awt.image.BufferedImage;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @journeymap.client.api.ClientPlugin
 public class JourneyMapMod implements IClientPlugin {
 
     private final Plastic plastic = Plastic.getPlastic();
     private IClientAPI journeyMap;
+
+    private final ConcurrentHashMap<UUID, Waypoint> privateWaypoints = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Player, Waypoint> playerWaypoints = new ConcurrentHashMap<>();
 
     @Override
     public void initialize(IClientAPI journeyMap) {
@@ -43,11 +49,14 @@ public class JourneyMapMod implements IClientPlugin {
     @Subscribe
     public void onPlayerLocationUpdated(PlayerLocationUpdatedEvent event) {
         if (!event.player.id().equals(plastic.world.currentPlayer().id())) {
-            BufferedImage icon = event.player.avatar().orElse(null);
-            journeymap.client.api.display.Waypoint playerWaypoint = waypointFrom(event.player.name(), icon, event.position, event.dimension);
-            if (event.position.equals(Position.UNKNOWN)) {
-                journeyMap.remove(playerWaypoint);
-            } else {
+            Waypoint removed = playerWaypoints.remove(event.player);
+            if (removed != null) {
+                journeyMap.remove(removed);
+            }
+            if (!event.position.equals(Position.UNKNOWN)) {
+                BufferedImage icon = event.player.avatar().orElse(null);
+                Waypoint playerWaypoint = waypointFrom(event.player.name(), icon, event.position, event.dimension);
+                playerWaypoints.put(event.player, playerWaypoint);
                 show(playerWaypoint);
             }
         }
@@ -65,12 +74,17 @@ public class JourneyMapMod implements IClientPlugin {
 
     @Subscribe
     public void onWaypointCreated(WaypointCreatedEvent event) {
-        show(waypointFrom(event.name, null, event.position, event.dimension));
+        Waypoint playerWaypoint = waypointFrom(event.name, null, event.position, event.dimension);
+        privateWaypoints.put(event.id, playerWaypoint);
+        show(playerWaypoint);
     }
 
     @Subscribe
     public void onWaypointDeleted(WaypointDeletedEvent event) {
-        journeyMap.remove(waypointFrom(event.name, null, event.position, event.dimension));
+        Waypoint removed = privateWaypoints.remove(event.id);
+        if (removed != null) {
+            journeyMap.remove(removed);
+        }
     }
 
     private void show(journeymap.client.api.display.Waypoint playerWaypoint) {
@@ -81,7 +95,7 @@ public class JourneyMapMod implements IClientPlugin {
         }
     }
 
-    private journeymap.client.api.display.Waypoint waypointFrom(String name, BufferedImage icon, Position position, Dimension dimension) {
+    private Waypoint waypointFrom(String name, BufferedImage icon, Position position, Dimension dimension) {
         int dimensionId;
         switch (dimension) {
             case OVERWORLD:

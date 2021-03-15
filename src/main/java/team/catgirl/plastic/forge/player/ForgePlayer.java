@@ -17,6 +17,7 @@ import team.catgirl.plastic.world.Position;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -29,9 +30,11 @@ public class ForgePlayer implements Player {
             .initialCapacity(50)
             .build();
 
+    public final UUID id;
     public final EntityPlayer player;
 
     public ForgePlayer(EntityPlayer player) {
+        this.id = player.getUniqueID();
         this.player = player;
     }
 
@@ -93,5 +96,18 @@ public class ForgePlayer implements Player {
         } catch (ExecutionException e) {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ForgePlayer that = (ForgePlayer) o;
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
