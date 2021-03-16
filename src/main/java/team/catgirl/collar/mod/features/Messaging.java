@@ -65,7 +65,7 @@ public class Messaging implements MessagingListener {
             TextMessage textMessage = (TextMessage) message;
             TextComponentString textComponentString = new TextComponentString(textMessage.content);
             textComponentString.getStyle().setColor(TextFormatting.LIGHT_PURPLE);
-            plastic.display.sendMessage(textComponentString.getText());
+            plastic.display.displayMessage(plastic.display.textBuilderFromFormattedString(textComponentString.getText()));
         }
     }
 
@@ -82,6 +82,6 @@ public class Messaging implements MessagingListener {
     private void displayConsoleMessage(TextMessage textMessage, TextFormatting color) {
         TextComponentString textComponentString = new TextComponentString(textMessage.consoleMessage);
         textComponentString.getStyle().setColor(color);
-        plastic.display.sendMessage(textMessage.consoleMessage);
+        plastic.display.displayMessage(plastic.display.textBuilderFromJSON(textMessage.consoleMessage));
     }
 }

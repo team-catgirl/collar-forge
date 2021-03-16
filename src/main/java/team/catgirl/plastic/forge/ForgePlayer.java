@@ -1,4 +1,4 @@
-package team.catgirl.plastic.forge.player;
+package team.catgirl.plastic.forge;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;

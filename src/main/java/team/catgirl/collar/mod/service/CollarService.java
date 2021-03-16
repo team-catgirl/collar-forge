@@ -80,7 +80,7 @@ public class CollarService implements CollarListener {
     }
 
     public void with(Consumer<Collar> action) {
-        with(action, () -> plastic.display.sendMessage("Collar not connected"));
+        with(action, () -> plastic.display.displayMessage(plastic.display.newTextBuilder().add("Collar not connected", TextFormatting.YELLOW)));
     }
 
     public void connect() {
@@ -89,10 +89,10 @@ public class CollarService implements CollarListener {
                 collar = createCollar();
                 collar.connect();
             } catch (CollarException e) {
-                plastic.display.displayStatus(e.getMessage());
+                plastic.display.displayMessage(plastic.display.newTextBuilder().add(e.getMessage(), TextFormatting.RED));
                 logger.error(e.getMessage(), e);
             } catch (IOException e) {
-                plastic.display.displayStatus("Failed to connect to Collar");
+                plastic.display.displayMessage(plastic.display.newTextBuilder().add("Failed to connect to Collar", TextFormatting.RED));
                 logger.error(e.getMessage(), e);
             }
         });
@@ -112,13 +112,11 @@ public class CollarService implements CollarListener {
             String formatted;
             switch (state) {
                 case CONNECTING:
-                    formatted = this.plastic.display.newTextBuilder().add("Collar connecting...", TextFormatting.GREEN).formatted();
-                    plastic.display.sendMessage(formatted);
+                    plastic.display.displayMessage(this.plastic.display.newTextBuilder().add("Collar connecting...", TextFormatting.GREEN));
                     eventBus.dispatch(new CollarConnectedEvent(collar));
                     break;
                 case CONNECTED:
-                    formatted = this.plastic.display.newTextBuilder().add("Collar connected", TextFormatting.GREEN).formatted();
-                    plastic.display.sendMessage(formatted);
+                    plastic.display.displayMessage(this.plastic.display.newTextBuilder().add("Collar connected", TextFormatting.GREEN));
                     collar.location().subscribe(locations);
                     collar.groups().subscribe(groups);
                     collar.friends().subscribe(friends);
@@ -126,8 +124,7 @@ public class CollarService implements CollarListener {
                     collar.textures().subscribe(textures);
                     break;
                 case DISCONNECTED:
-                    formatted = this.plastic.display.newTextBuilder().add("Collar disconnected", TextFormatting.GREEN).formatted();
-                    plastic.display.sendMessage(formatted);
+                    plastic.display.displayMessage(this.plastic.display.newTextBuilder().add("Collar disconnected", TextFormatting.GREEN));
                     eventBus.dispatch(new CollarDisconnectedEvent());
                     break;
             }
@@ -149,11 +146,10 @@ public class CollarService implements CollarListener {
 
     @Override
     public void onConfirmDeviceRegistration(Collar collar, String token, String approvalUrl) {
-        plastic.display.displayStatus("Collar registration required");
-        String formatted = plastic.display.newTextBuilder().add("New Collar installation detected. You can register this installation with your Collar account at ")
-                .add(approvalUrl, TextFormatting.GOLD, new TextAction.OpenLinkAction(approvalUrl))
-                .formatted();
-        plastic.display.sendMessage(formatted);
+        plastic.display.displayStatusMessage("Collar registration required");
+        TextBuilder text = plastic.display.newTextBuilder().add("New Collar installation detected. You can register this installation with your Collar account at ")
+                .add(approvalUrl, TextFormatting.GOLD, new TextAction.OpenLinkAction(approvalUrl));
+        plastic.display.displayMessage(text);
     }
 
     @Override
@@ -167,18 +163,16 @@ public class CollarService implements CollarListener {
 
     @Override
     public void onMinecraftAccountVerificationFailed(Collar collar, MinecraftSession session) {
-        plastic.display.displayStatus("Account verification failed");
-        String message = plastic.display.newTextBuilder().add("Collar failed to verify your Minecraft account", TextFormatting.RED).formatted();
-        plastic.display.sendMessage(message);
+        plastic.display.displayStatusMessage("Account verification failed");
+        plastic.display.displayMessage(plastic.display.newTextBuilder().add("Collar failed to verify your Minecraft account", TextFormatting.RED));
     }
 
     @Override
     public void onPrivateIdentityMismatch(Collar collar, String url) {
-        plastic.display.displayStatus("Collar encountered a problem");
-        String formatted = plastic.display.newTextBuilder().add("Your private identity did not match. We cannot decrypt your private data. To resolve please visit ")
-                .add(url, TextFormatting.RED, new TextAction.OpenLinkAction(url))
-                .formatted();
-        plastic.display.sendMessage(formatted + url);
+        plastic.display.displayStatusMessage("Collar encountered a problem");
+        TextBuilder builder = plastic.display.newTextBuilder().add("Your private identity did not match. We cannot decrypt your private data. To resolve please visit ")
+                .add(url, TextFormatting.RED, new TextAction.OpenLinkAction(url));
+        plastic.display.displayMessage(builder);
     }
 
     private Collar createCollar() throws IOException {

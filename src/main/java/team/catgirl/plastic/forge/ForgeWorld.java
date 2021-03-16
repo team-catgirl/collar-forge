@@ -1,4 +1,4 @@
-package team.catgirl.plastic.forge.world;
+package team.catgirl.plastic.forge;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -6,7 +6,6 @@ import team.catgirl.event.EventBus;
 import team.catgirl.plastic.player.Player;
 import team.catgirl.plastic.ui.TextureProvider;
 import team.catgirl.plastic.world.World;
-import team.catgirl.plastic.forge.player.ForgePlayer;
 
 import java.util.List;
 import java.util.stream.Collectors;

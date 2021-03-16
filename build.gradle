@@ -25,6 +25,7 @@ minecraft {
     runDir = "run"
     version = project.property('collar.forge.version')
     mappings = "${project.property('collar.mcp.channel')}_${project.property('collar.mcp.mapping')}"
+    makeObfSourceJar = false
 }
 
 repositories {

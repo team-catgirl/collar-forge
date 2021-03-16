@@ -4,9 +4,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import team.catgirl.event.EventBus;
 import team.catgirl.plastic.Plastic;
-import team.catgirl.plastic.forge.ui.ForgeCommands;
-import team.catgirl.plastic.forge.ui.ForgeDisplay;
-import team.catgirl.plastic.forge.world.ForgeWorld;
 import team.catgirl.plastic.ui.TextureProvider;
 
 import java.io.File;

@@ -1,7 +1,8 @@
-package team.catgirl.plastic.forge.ui;
+package team.catgirl.plastic.forge;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.TextComponentString;
+import team.catgirl.plastic.forge.ForgeTextBuilder;
 import team.catgirl.plastic.ui.Display;
 import team.catgirl.plastic.ui.TextBuilder;
 
