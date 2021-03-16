@@ -111,11 +111,17 @@ public class ForgePlayer implements Player {
             NetworkPlayerInfo playerInfo = ObfuscationReflectionHelper.getPrivateValue(AbstractClientPlayer.class, acp, "field_175157_a");
             Map<MinecraftProfileTexture.Type, ResourceLocation> textures = ObfuscationReflectionHelper.getPrivateValue(NetworkPlayerInfo.class, playerInfo, "field_187107_a");
             String textureName = String.format("plastic-capes/%s.png", playerInfo.getGameProfile().getId());
-            textureProvider.getTexture(this, TextureType.CAPE).ifPresent(bufferedImage -> {
-                ResourceLocation resourceLocation = minecraft.getTextureManager().getDynamicTextureLocation(textureName, new DynamicTexture(bufferedImage));
-                minecraft.getTextureManager().bindTexture(resourceLocation);
-                textures.put(MinecraftProfileTexture.Type.CAPE, resourceLocation);
-                textures.put(MinecraftProfileTexture.Type.ELYTRA, resourceLocation);
+            textureProvider.getTexture(this, TextureType.CAPE).thenAccept(textureOptional -> {
+                textureOptional.ifPresent(texture -> {
+                    texture.loadImage(imageOptional -> {
+                        imageOptional.ifPresent(bufferedImage -> {
+                            ResourceLocation resourceLocation = minecraft.getTextureManager().getDynamicTextureLocation(textureName, new DynamicTexture(bufferedImage));
+//                            minecraft.getTextureManager().bindTexture(resourceLocation);
+                            textures.put(MinecraftProfileTexture.Type.CAPE, resourceLocation);
+                            textures.put(MinecraftProfileTexture.Type.ELYTRA, resourceLocation);
+                        });
+                    });
+                });
             });
         }
     }
