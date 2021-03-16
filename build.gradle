@@ -2,6 +2,7 @@ buildscript {
     repositories {
         mavenLocal()
         maven { url = 'https://files.minecraftforge.net/maven' }
+        maven { url 'https://jitpack.io' }
         jcenter()
         mavenCentral()
     }
@@ -75,8 +76,8 @@ dependencies {
     // compile "some.group:artifact:version:classifier"
     // compile "some.group:artifact:version"
 
-    compile group: 'team.catgirl.collar', name: 'client', version: '1.0-SNAPSHOT', classifier: 'full'
-    compile group: 'team.catgirl.collar', name: 'plugin', version: '1.0-SNAPSHOT'
+    compile group: 'team.catgirl.collar', name: 'client', version: 'master-SNAPSHOT', classifier: 'full'
+    compile group: 'team.catgirl.collar', name: 'plugin', version: 'master-SNAPSHOT'
     compile 'com.mojang:brigadier:1.0.17'
     implementation group: 'info.journeymap', name: 'journeymap-api', version: '1.12-1.4'
 
