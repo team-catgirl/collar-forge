@@ -114,7 +114,7 @@ public class CollarService implements CollarListener {
                 case CONNECTING:
                     formatted = this.plastic.display.newTextBuilder().add("Collar connecting...", TextFormatting.GREEN).formatted();
                     plastic.display.sendMessage(formatted);
-                    eventBus.dispatch(new CollarConnectedEvent());
+                    eventBus.dispatch(new CollarConnectedEvent(collar));
                     break;
                 case CONNECTED:
                     formatted = this.plastic.display.newTextBuilder().add("Collar connected", TextFormatting.GREEN).formatted();

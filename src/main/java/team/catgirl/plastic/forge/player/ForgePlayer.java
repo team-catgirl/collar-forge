@@ -2,14 +2,22 @@ package team.catgirl.plastic.forge.player;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
+import net.minecraft.client.network.NetworkPlayerInfo;
+import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import org.jetbrains.annotations.NotNull;
+import team.catgirl.plastic.ui.TextureProvider;
+import team.catgirl.plastic.ui.TextureType;
 import team.catgirl.plastic.world.Dimension;
 import team.catgirl.plastic.player.Player;
 import team.catgirl.plastic.world.Position;
@@ -17,11 +25,14 @@ import team.catgirl.plastic.world.Position;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ForgePlayer implements Player {
 
@@ -32,10 +43,13 @@ public class ForgePlayer implements Player {
 
     public final UUID id;
     public final EntityPlayer player;
+    private final TextureProvider textureProvider;
+    private final Minecraft minecraft = Minecraft.getMinecraft();
 
-    public ForgePlayer(EntityPlayer player) {
+    public ForgePlayer(EntityPlayer player, TextureProvider textureProvider) {
         this.id = player.getUniqueID();
         this.player = player;
+        this.textureProvider = textureProvider;
     }
 
     @Override
@@ -77,23 +91,50 @@ public class ForgePlayer implements Player {
     public Optional<BufferedImage> avatar() {
         try {
             return AVATAR_CACHE.get(name(), () -> {
-                EntityPlayer playerEntityByName = Minecraft.getMinecraft().world.getPlayerEntityByName(player.getName());
-                if (playerEntityByName == null) {
-                    return Optional.empty();
-                }
-                EntityOtherPlayerMP playerMP = (EntityOtherPlayerMP) playerEntityByName;
-                ResourceLocation locationSkin = playerMP.getLocationSkin();
-                try {
-                    IResource resource = Minecraft.getMinecraft().getResourceManager().getResource(locationSkin);
-                    try (InputStream stream = resource.getInputStream()) {
-                        BufferedImage bufferedImage = TextureUtil.readBufferedImage(stream);
-                        return Optional.of(bufferedImage.getSubimage(8, 8, 15, 15));
-                    }
-                } catch (IOException e) {
-                    return Optional.empty();
-                }
+                AtomicReference<BufferedImage> avatarImage = new AtomicReference<>();
+                textureProvider.getTexture(this, TextureType.AVATAR);
+                return avatarImage.get() == null ? Optional.empty() : Optional.of(avatarImage.get());
             });
         } catch (ExecutionException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public void onRender() {
+        if (!(player instanceof AbstractClientPlayer)) {
+            return;
+        }
+        boolean hasCape = ((AbstractClientPlayer) player).hasPlayerInfo() && ((AbstractClientPlayer) player).getLocationCape() != null;
+        if (!hasCape) {
+            AbstractClientPlayer acp = (AbstractClientPlayer) player;
+            NetworkPlayerInfo playerInfo = ObfuscationReflectionHelper.getPrivateValue(AbstractClientPlayer.class, acp, "field_175157_a");
+            Map<MinecraftProfileTexture.Type, ResourceLocation> textures = ObfuscationReflectionHelper.getPrivateValue(NetworkPlayerInfo.class, playerInfo, "field_187107_a");
+            String textureName = String.format("plastic-capes/%s.png", playerInfo.getGameProfile().getId());
+            textureProvider.getTexture(this, TextureType.CAPE).ifPresent(bufferedImage -> {
+                ResourceLocation resourceLocation = minecraft.getTextureManager().getDynamicTextureLocation(textureName, new DynamicTexture(bufferedImage));
+                minecraft.getTextureManager().bindTexture(resourceLocation);
+                textures.put(MinecraftProfileTexture.Type.CAPE, resourceLocation);
+                textures.put(MinecraftProfileTexture.Type.ELYTRA, resourceLocation);
+            });
+        }
+    }
+
+    @NotNull
+    private Optional<BufferedImage> defaultAvatar() {
+        EntityPlayer playerEntityByName = minecraft.world.getPlayerEntityByName(player.getName());
+        if (playerEntityByName == null) {
+            return Optional.empty();
+        }
+        EntityOtherPlayerMP playerMP = (EntityOtherPlayerMP) playerEntityByName;
+        ResourceLocation locationSkin = playerMP.getLocationSkin();
+        try {
+            IResource resource = minecraft.getResourceManager().getResource(locationSkin);
+            try (InputStream stream = resource.getInputStream()) {
+                BufferedImage bufferedImage = TextureUtil.readBufferedImage(stream);
+                return Optional.of(bufferedImage.getSubimage(8, 8, 15, 15));
+            }
+        } catch (IOException e) {
             return Optional.empty();
         }
     }
