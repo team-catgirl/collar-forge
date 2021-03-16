@@ -8,9 +8,7 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 1.8
@@ -23,3 +21,8 @@ jobs:
       run: ./gradlew setupDecompWorkspace
     - name: Build with Gradle
       run: ./gradlew build
+    - name: Upload client jar
+      uses: actions/upload-artifact@v2
+      with:
+        name: collar.jar
+        path: mod/build/build/libs/team.catgirl.collar-*.jar
