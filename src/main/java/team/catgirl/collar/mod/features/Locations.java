@@ -42,8 +42,8 @@ public class Locations implements LocationListener {
         } else {
             message = String.format("Waypoint %s created in %s %s", waypoint.name, group.type.name, group.name);
         }
-        plastic.display.displayStatus(message);
-        plastic.display.sendMessage(message);
+        plastic.display.displayStatusMessage(message);
+        plastic.display.displayInfoMessage(message);
         Position position = getPosition(waypoint.location);
         Dimension dimension = getDimension(waypoint.location.dimension);
         events.dispatch(new WaypointCreatedEvent(waypoint.id, waypoint.name, group == null ? null : group.name, position, dimension));
@@ -57,8 +57,8 @@ public class Locations implements LocationListener {
         } else {
             message = String.format("Waypoint %s removed from %s %s", waypoint.name, group.type.name, group.name);
         }
-        plastic.display.displayStatus(message);
-        plastic.display.sendMessage(message);
+        plastic.display.displayStatusMessage(message);
+        plastic.display.displayInfoMessage(message);
         events.dispatch(new WaypointDeletedEvent(waypoint.id, waypoint.name, getPosition(waypoint.location), getDimension(waypoint.location.dimension)));
     }
 
@@ -69,12 +69,12 @@ public class Locations implements LocationListener {
 
     @Override
     public void onStartedSharingLocation(Collar collar, LocationApi locationApi, Group group) {
-        plastic.display.sendMessage(String.format("Started sharing location with %s", group.name));
+        plastic.display.displayInfoMessage(String.format("Started sharing location with %s", group.name));
     }
 
     @Override
     public void onStoppedSharingLocation(Collar collar, LocationApi locationApi, Group group) {
-        plastic.display.sendMessage(String.format("Stopped sharing location with %s", group.name));
+        plastic.display.displayInfoMessage(String.format("Stopped sharing location with %s", group.name));
     }
 
     private Position getPosition(Location location) {

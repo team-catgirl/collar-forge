@@ -1,6 +1,5 @@
 package team.catgirl.plastic;
 
-import team.catgirl.plastic.forge.ForgePlastic;
 import team.catgirl.plastic.ui.Commands;
 import team.catgirl.plastic.ui.Display;
 import team.catgirl.plastic.world.World;

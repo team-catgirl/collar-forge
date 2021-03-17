@@ -36,5 +36,7 @@ public abstract class TextBuilder {
     /**
      * @return formatted text
      */
-    public abstract String formatted();
+    public abstract String formattedString();
+
+    public abstract String toJSON();
 }

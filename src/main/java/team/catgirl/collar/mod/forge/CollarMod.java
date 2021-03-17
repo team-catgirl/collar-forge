@@ -1,9 +1,16 @@
 package team.catgirl.collar.mod.forge;
 
+import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+import net.minecraft.client.entity.AbstractClientPlayer;
+import net.minecraft.client.network.NetworkPlayerInfo;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -16,11 +23,19 @@ import org.apache.logging.log4j.Logger;
 import team.catgirl.collar.client.CollarListener;
 import team.catgirl.collar.client.minecraft.Ticks;
 import team.catgirl.collar.mod.commands.Commands;
+import team.catgirl.collar.mod.plastic.CollarTextureProvider;
 import team.catgirl.collar.mod.plugins.Plugins;
 import team.catgirl.collar.mod.service.CollarService;
 import team.catgirl.event.EventBus;
+import team.catgirl.event.Subscribe;
 import team.catgirl.plastic.Plastic;
+import team.catgirl.plastic.events.LoadPlayerTexturesEvent;
 import team.catgirl.plastic.forge.ForgePlastic;
+import team.catgirl.plastic.ui.TextureProvider;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Supplier;
 
 @SideOnly(Side.CLIENT)
 @Mod(modid = CollarMod.MODID, name = CollarMod.NAME, version = CollarMod.VERSION)
@@ -35,7 +50,7 @@ public class CollarMod implements CollarListener
     private static boolean isWorldLoaded = true;
     private static boolean isConnectedToServer = false;
     private static final Plugins PLUGINS = new ForgePlugins();
-    private static final Plastic PLASTIC = new ForgePlastic();
+    private static Plastic PLASTIC;
     public static final EventBus EVENT_BUS = new EventBus();
 
     private CollarService collarService;
@@ -48,6 +63,9 @@ public class CollarMod implements CollarListener
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
+        CollarTextureProvider textureProvider = new CollarTextureProvider();
+        EVENT_BUS.subscribe(textureProvider);
+        PLASTIC = new ForgePlastic(textureProvider);
         collarService = new CollarService(PLASTIC, EVENT_BUS, TICKS, PLUGINS, logger);
         PLASTIC.commands.register("collar", collarService, new Commands(collarService, PLASTIC).create());
     }
@@ -79,5 +97,14 @@ public class CollarMod implements CollarListener
         if (collarService != null) {
             collarService.disconnect();
         }
+    }
+
+    @SubscribeEvent
+    public void renderPlayer(RenderPlayerEvent.Post event) {
+        EntityPlayer player = event.getEntityPlayer();
+        UUID uuid = player.getUniqueID();
+        PLASTIC.world.allPlayers().stream()
+                .filter(candidate -> candidate.id().equals(uuid)).findFirst()
+                .ifPresent(team.catgirl.plastic.player.Player::onRender);
     }
 }
