@@ -8,6 +8,8 @@ import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.entity.player.EntityPlayer;
@@ -54,7 +56,7 @@ public class ForgePlayer implements Player {
 
     @Override
     public UUID id() {
-        return player.getGameProfile().getId();
+        return player.getUniqueID();
     }
 
     @Override
@@ -112,15 +114,17 @@ public class ForgePlayer implements Player {
             Map<MinecraftProfileTexture.Type, ResourceLocation> textures = ObfuscationReflectionHelper.getPrivateValue(NetworkPlayerInfo.class, playerInfo, "field_187107_a");
             String textureName = String.format("plastic-capes/%s.png", playerInfo.getGameProfile().getId());
             textureProvider.getTexture(this, TextureType.CAPE).thenAccept(textureOptional -> {
-                textureOptional.ifPresent(texture -> {
-                    texture.loadImage(imageOptional -> {
-                        imageOptional.ifPresent(bufferedImage -> {
-                            ResourceLocation resourceLocation = minecraft.getTextureManager().getDynamicTextureLocation(textureName, new DynamicTexture(bufferedImage));
-//                            minecraft.getTextureManager().bindTexture(resourceLocation);
-                            textures.put(MinecraftProfileTexture.Type.CAPE, resourceLocation);
-                            textures.put(MinecraftProfileTexture.Type.ELYTRA, resourceLocation);
-                        });
-                    });
+                textureOptional.ifPresent(bufferedImage -> {
+                    TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
+                    ResourceLocation resourceLocation = minecraft.getTextureManager().getDynamicTextureLocation(textureName, new DynamicTexture(bufferedImage));
+                    SimpleTexture texture = new SimpleTexture(resourceLocation);
+                    try {
+                        texture.loadTexture(Minecraft.getMinecraft().getResourceManager());
+                        textures.put(MinecraftProfileTexture.Type.CAPE, resourceLocation);
+                        textures.put(MinecraftProfileTexture.Type.ELYTRA, resourceLocation);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 });
             });
         }
