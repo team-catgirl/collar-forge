@@ -8,5 +8,5 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public interface TextureProvider {
-    CompletableFuture<Optional<BufferedImage>> getTexture(Player player, TextureType type);
+    Optional<BufferedImage> getTexture(Player player, TextureType type);
 }

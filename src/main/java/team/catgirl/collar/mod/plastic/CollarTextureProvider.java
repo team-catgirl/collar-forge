@@ -2,9 +2,7 @@ package team.catgirl.collar.mod.plastic;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import scala.tools.cmd.Opt;
 import team.catgirl.collar.client.Collar;
-import team.catgirl.collar.client.api.textures.Texture;
 import team.catgirl.collar.mod.service.events.CollarConnectedEvent;
 import team.catgirl.collar.mod.service.events.CollarDisconnectedEvent;
 import team.catgirl.event.Subscribe;
@@ -16,9 +14,7 @@ import java.awt.image.BufferedImage;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,23 +22,36 @@ public class CollarTextureProvider implements TextureProvider {
 
     private static final Logger LOGGER = Logger.getLogger(CollarTextureProvider.class.getName());
 
-    private static final Cache<TextureKey, CompletableFuture<Optional<BufferedImage>>> TEXTURE_CACHE = CacheBuilder.newBuilder()
+    private static final Cache<TextureKey, Optional<BufferedImage>> TEXTURE_CACHE = CacheBuilder.newBuilder()
             .expireAfterAccess(5, TimeUnit.SECONDS)
             .initialCapacity(100)
             .build();
 
+    private final ConcurrentMap<TextureKey, CompletableFuture<Optional<BufferedImage>>> LOADING = new ConcurrentHashMap<>();
+
     private Collar collar;
 
+
+
     @Override
-    public CompletableFuture<Optional<BufferedImage>> getTexture(Player player, TextureType type) {
+    public Optional<BufferedImage> getTexture(Player player, TextureType type) {
         if (collar == null || !collar.getState().equals(Collar.State.CONNECTED)) {
-            return CompletableFuture.completedFuture(Optional.empty());
+            return Optional.empty();
         }
-        try {
-            return TEXTURE_CACHE.get(new TextureKey(player.id(), type), () -> loadTexture(player, type));
-        } catch (ExecutionException e) {
-            LOGGER.log(Level.SEVERE, "Could not load collar texture", e);
-            return CompletableFuture.completedFuture(Optional.empty());
+        TextureKey key = new TextureKey(player.id(), type);
+        if (LOADING.containsKey(key)) {
+            return Optional.empty();
+        }
+        if (TEXTURE_CACHE.asMap().containsKey(key)) {
+            return TEXTURE_CACHE.getIfPresent(key);
+        } else {
+            CompletableFuture<Optional<BufferedImage>> future = loadTexture(player, type);
+            LOADING.put(key, future);
+            future.thenAcceptAsync(bufferedImage -> {
+                TEXTURE_CACHE.put(key, bufferedImage);
+                LOADING.remove(key);
+            });
+            return Optional.empty();
         }
     }
 
