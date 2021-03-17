@@ -15,6 +15,7 @@ import team.catgirl.collar.api.waypoints.Waypoint;
 import team.catgirl.collar.mod.commands.arguments.*;
 import team.catgirl.collar.mod.commands.arguments.IdentityArgumentType.IdentityArgument;
 import team.catgirl.collar.mod.commands.arguments.WaypointArgumentType.WaypointArgument;
+import team.catgirl.collar.mod.features.EmoteMessage;
 import team.catgirl.plastic.Plastic;
 import team.catgirl.plastic.player.Player;
 import team.catgirl.plastic.ui.TextFormatting;
@@ -52,6 +53,19 @@ public class Commands {
         registerWaypointCommands(dispatcher);
         registerGroupCommands(GroupType.PARTY, dispatcher);
         registerGroupCommands(GroupType.GROUP, dispatcher);
+
+
+        // collar emote wave
+        dispatcher.register(literal("emote").then(argument("emote", string()).executes(context -> {
+
+            collarService.with(collar -> {
+                byte[] emotePacket = getEmotePacket(context.getArgument("emote", String.class));
+                collar.messaging().sendNearbyMessage(new EmoteMessage(emotePacket));
+            });
+
+            return 1;
+        })));
+
         return dispatcher;
     }
 

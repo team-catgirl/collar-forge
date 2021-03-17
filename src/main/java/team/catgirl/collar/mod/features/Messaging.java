@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import team.catgirl.collar.api.groups.Group;
+import team.catgirl.collar.api.groups.GroupType;
 import team.catgirl.collar.api.messaging.Message;
 import team.catgirl.collar.api.messaging.TextMessage;
 import team.catgirl.collar.api.session.Player;
@@ -76,7 +77,10 @@ public class Messaging implements MessagingListener {
 
     @Override
     public void onGroupMessageReceived(Collar collar, MessagingApi messagingApi, Group group, Player sender, Message message) {
-
+        if (group.type == GroupType.NEARBY && message instanceof EmoteMessage) {
+            EmoteMessage emoteMessage = (EmoteMessage) message;
+            displayEmote(emoteMessage.emotePacket);
+        }
     }
 
     private void displayConsoleMessage(TextMessage textMessage, TextFormatting color) {
