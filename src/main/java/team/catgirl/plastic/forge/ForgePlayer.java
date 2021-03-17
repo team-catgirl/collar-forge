@@ -8,8 +8,6 @@ import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.client.renderer.texture.SimpleTexture;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.entity.player.EntityPlayer;
@@ -33,7 +31,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ForgePlayer implements Player {
@@ -115,16 +112,10 @@ public class ForgePlayer implements Player {
             String textureName = String.format("plastic-capes/%s.png", playerInfo.getGameProfile().getId());
             textureProvider.getTexture(this, TextureType.CAPE).thenAccept(textureOptional -> {
                 textureOptional.ifPresent(bufferedImage -> {
-                    TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
                     ResourceLocation resourceLocation = minecraft.getTextureManager().getDynamicTextureLocation(textureName, new DynamicTexture(bufferedImage));
-                    SimpleTexture texture = new SimpleTexture(resourceLocation);
-                    try {
-                        texture.loadTexture(Minecraft.getMinecraft().getResourceManager());
-                        textures.put(MinecraftProfileTexture.Type.CAPE, resourceLocation);
-                        textures.put(MinecraftProfileTexture.Type.ELYTRA, resourceLocation);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    Minecraft.getMinecraft().getTextureManager().bindTexture(resourceLocation);
+                    textures.put(MinecraftProfileTexture.Type.CAPE, resourceLocation);
+                    textures.put(MinecraftProfileTexture.Type.ELYTRA, resourceLocation);
                 });
             });
         }
