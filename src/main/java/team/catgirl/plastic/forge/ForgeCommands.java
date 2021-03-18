@@ -1,4 +1,4 @@
-package team.catgirl.plastic.forge.ui;
+package team.catgirl.plastic.forge;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraftforge.client.ClientCommandHandler;

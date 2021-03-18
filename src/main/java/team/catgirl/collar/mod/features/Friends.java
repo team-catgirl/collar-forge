@@ -17,16 +17,16 @@ public class Friends implements FriendsListener {
 
     @Override
     public void onFriendChanged(Collar collar, FriendsApi friendsApi, Friend friend) {
-        plastic.display.displayStatus(plastic.display.newTextBuilder().add(String.format("%s is %s", friend.friend.name, friend.status.name().toLowerCase()), TextFormatting.GREEN).formatted());
+        plastic.display.displayStatusMessage(plastic.display.newTextBuilder().add(String.format("%s is %s", friend.friend.name, friend.status.name().toLowerCase()), TextFormatting.GREEN));
     }
 
     @Override
     public void onFriendAdded(Collar collar, FriendsApi friendsApi, Friend added) {
-        plastic.display.sendMessage(plastic.display.newTextBuilder().add(String.format("Added %s as a friend", added.friend.name), TextFormatting.GREEN).formatted());
+        plastic.display.displayMessage(String.format("Added %s as a friend", added.friend.name));
     }
 
     @Override
     public void onFriendRemoved(Collar collar, FriendsApi friendsApi, Friend removed) {
-        plastic.display.sendMessage(plastic.display.newTextBuilder().add(String.format("Removed %s as a friend", removed.friend.name), TextFormatting.GREEN).formatted());
+        plastic.display.displayMessage(String.format("Removed %s as a friend", removed.friend.name));
     }
 }

@@ -2,18 +2,17 @@ package team.catgirl.plastic.forge;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
+import team.catgirl.event.EventBus;
 import team.catgirl.plastic.Plastic;
-import team.catgirl.plastic.forge.ui.ForgeCommands;
-import team.catgirl.plastic.forge.ui.ForgeDisplay;
-import team.catgirl.plastic.forge.world.ForgeWorld;
+import team.catgirl.plastic.ui.TextureProvider;
 
 import java.io.File;
 
 public class ForgePlastic extends Plastic {
 
 
-    public ForgePlastic() {
-        super(new ForgeDisplay(), new ForgeWorld(), new ForgeCommands());
+    public ForgePlastic(TextureProvider textureProvider) {
+        super(new ForgeDisplay(), new ForgeWorld(textureProvider), new ForgeCommands());
     }
 
     @Override

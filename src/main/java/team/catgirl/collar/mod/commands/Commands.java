@@ -71,8 +71,8 @@ public class Commands {
         // collar status
         dispatcher.register(literal("status").executes(context -> {
             collarService.with(collar -> {
-                plastic.display.sendMessage("Collar is " + collar.getState().name().toLowerCase());
-            }, () -> plastic.display.sendMessage("Collar is disconnected"));
+                plastic.display.displayInfoMessage("Collar is " + collar.getState().name().toLowerCase());
+            }, () -> plastic.display.displayMessage("Collar is disconnected"));
             return 1;
         }));
     }
@@ -119,11 +119,11 @@ public class Commands {
                     collarService.with(collar -> {
                         Set<Friend> friends = collar.friends().list();
                         if (friends.isEmpty()) {
-                            plastic.display.sendMessage("You don't have any friends");
+                            plastic.display.displayInfoMessage("You don't have any friends");
                         } else {
                             friends.stream().sorted(Comparator.comparing(o -> o.status)).forEach(friend -> {
                                 TextFormatting color = friend.status.equals(Status.ONLINE) ? TextFormatting.GREEN : TextFormatting.GRAY;
-                                plastic.display.sendMessage(plastic.display.newTextBuilder().add(friend.friend.name, color).formatted());
+                                plastic.display.displayMessage(plastic.display.newTextBuilder().add(friend.friend.name, color));
                             });
                         }
                     });
@@ -185,10 +185,10 @@ public class Commands {
                                 .filter(group -> group.type.equals(type))
                                 .collect(Collectors.toList());
                         if (parties.isEmpty()) {
-                            plastic.display.sendMessage("You are not a member of any " + type.plural);
+                            plastic.display.displayInfoMessage("You are not a member of any " + type.plural);
                         } else {
-                            plastic.display.sendMessage("You belong to the following " + type.plural + ":");
-                            parties.forEach(group -> plastic.display.sendMessage(group.name));
+                            plastic.display.displayInfoMessage("You belong to the following " + type.plural + ":");
+                            parties.forEach(group -> plastic.display.displayInfoMessage(group.name));
                         }
                     });
                     return 1;
@@ -262,10 +262,10 @@ public class Commands {
                                     .filter(group -> collar.location().isSharingWith(group))
                                     .collect(Collectors.toList());
                             if (active.isEmpty()) {
-                                plastic.display.sendMessage("You are not sharing your location with any groups");
+                                plastic.display.displayInfoMessage("You are not sharing your location with any groups");
                             } else {
-                                plastic.display.sendMessage("You are sharing your location with groups:");
-                                active.forEach(group -> plastic.display.sendMessage(group.name + " (" + group.type.name + ")"));
+                                plastic.display.displayInfoMessage("You are sharing your location with groups:");
+                                active.forEach(group -> plastic.display.displayInfoMessage(group.name + " (" + group.type.name + ")"));
                             }
                         });
                     return 1;
@@ -307,9 +307,9 @@ public class Commands {
                     collarService.with(collar -> {
                         Set<Waypoint> waypoints = collar.location().privateWaypoints();
                         if (waypoints.isEmpty()) {
-                            plastic.display.sendMessage("You have no private waypoints");
+                            plastic.display.displayInfoMessage("You have no private waypoints");
                         } else {
-                            waypoints.forEach(waypoint -> plastic.display.sendMessage(waypoint.displayName()));
+                            waypoints.forEach(waypoint -> plastic.display.displayInfoMessage(waypoint.displayName()));
                         }
                     });
                     return 1;
@@ -324,9 +324,9 @@ public class Commands {
                         Group group = getGroup(context, "group");
                         Set<Waypoint> waypoints = collar.location().groupWaypoints(group);
                         if (waypoints.isEmpty()) {
-                            plastic.display.sendMessage("You have no group waypoints");
+                            plastic.display.displayInfoMessage("You have no group waypoints");
                         } else {
-                            waypoints.forEach(waypoint -> plastic.display.sendMessage(waypoint.displayName()));
+                            waypoints.forEach(waypoint -> plastic.display.displayInfoMessage(waypoint.displayName()));
                         }
                     });
                     return 1;
@@ -370,7 +370,7 @@ public class Commands {
                         if (!group.id.equals(argument.group.id)) {
                             collar.location().removeWaypoint(argument.group, argument.waypoint);
                         } else {
-                            plastic.display.sendMessage("Waypoint " + argument.waypoint + " does not belong to group " + group.name);
+                            plastic.display.displayInfoMessage("Waypoint " + argument.waypoint + " does not belong to group " + group.name);
                         }
                     });
                     return 1;

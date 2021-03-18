@@ -1,5 +1,6 @@
-package team.catgirl.plastic.forge.ui;
+package team.catgirl.plastic.forge;
 
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.event.ClickEvent;
 import team.catgirl.plastic.ui.TextAction;
@@ -9,9 +10,9 @@ import team.catgirl.plastic.ui.TextFormatting;
 
 public final class ForgeTextBuilder extends TextBuilder {
 
-    private final TextComponentString componentString;
+    private final ITextComponent componentString;
 
-    public ForgeTextBuilder(TextComponentString componentString) {
+    public ForgeTextBuilder(ITextComponent componentString) {
         this.componentString = componentString;
     }
 
@@ -52,8 +53,13 @@ public final class ForgeTextBuilder extends TextBuilder {
     }
 
     @Override
-    public String formatted() {
+    public String formattedString() {
         return componentString.getFormattedText();
+    }
+
+    @Override
+    public String toJSON() {
+        return ITextComponent.Serializer.componentToJson(componentString);
     }
 
     net.minecraft.util.text.TextFormatting from(TextFormatting textFormatting) {

@@ -7,7 +7,6 @@ import team.catgirl.collar.client.api.groups.GroupInvitation;
 import team.catgirl.collar.client.api.groups.GroupsApi;
 import team.catgirl.collar.client.api.groups.GroupsListener;
 import team.catgirl.plastic.Plastic;
-import team.catgirl.plastic.ui.TextFormatting;
 
 public class Groups implements GroupsListener {
 
@@ -19,20 +18,17 @@ public class Groups implements GroupsListener {
 
     @Override
     public void onGroupCreated(Collar collar, GroupsApi groupsApi, Group group) {
-        String msg = plastic.display.newTextBuilder().add(String.format("Created %s %s", group.type.name, group.name), TextFormatting.GREEN).formatted();
-        this.plastic.display.sendMessage(msg);
+        this.plastic.display.displayMessage(String.format("Created %s %s", group.type.name, group.name));
     }
 
     @Override
     public void onGroupJoined(Collar collar, GroupsApi groupsApi, Group group, Player player) {
-        String msg = plastic.display.newTextBuilder().add(String.format("Joined %s %s", group.type.name, group.name), TextFormatting.GREEN).formatted();
-        this.plastic.display.sendMessage(msg);
+        this.plastic.display.displayMessage(String.format("Joined %s %s", group.type.name, group.name));
     }
 
     @Override
     public void onGroupLeft(Collar collar, GroupsApi groupsApi, Group group, Player player) {
-        String msg = plastic.display.newTextBuilder().add(String.format("Left %s %s", group.type.name, group.name), TextFormatting.GREEN).formatted();
-        this.plastic.display.sendMessage(msg);
+        this.plastic.display.displayMessage(String.format("Left %s %s", group.type.name, group.name));
     }
 
     @Override
@@ -41,7 +37,7 @@ public class Groups implements GroupsListener {
                 .stream().filter(player1 -> player1.id().equals(invitation.sender.minecraftPlayer.id))
                 .findFirst().orElseThrow(() -> new IllegalStateException("cannot find player " + invitation.sender.minecraftPlayer.id));
         String message = String.format("You are invited to %s %s by %s", invitation.type.name, invitation.name, player.name());
-        this.plastic.display.displayStatus(message);
-        this.plastic.display.sendMessage(plastic.display.newTextBuilder().add(message, TextFormatting.GREEN).formatted());
+        this.plastic.display.displayStatusMessage(message);
+        this.plastic.display.displayInfoMessage(message);
     }
 }
